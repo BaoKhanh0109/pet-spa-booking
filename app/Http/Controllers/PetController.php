@@ -1,75 +1,85 @@
 <?php
 
-namespace App\Http\Controllers; // Namespace chuẩn
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Pet; // Gọi Model Pet từ thư mục App\Models
+use App\Models\Pet;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PetController extends Controller
 {
-    public function create()
-    {
-    // Trả về file view giao diện vừa tạo
-    return view('pets.create');// Lấy tất cả khách hàng từ DB (chỉ lấy ID và Tên cho nhẹ)
-        $customers = Customer::select('customerID', 'customerName')->get();
-
-        // Truyền biến $customers sang view
-        return view('pets.create', compact('customers'));
-    }
-    // Lấy danh sách
-    public function index()
-    {
-        return response()->json(Pet::all());
+    public function index() {
+        $pets = Pet::where('userID', Auth::user()->userID)->get();
+        return view('pets.index', compact('pets'));
     }
 
-    // Xem chi tiết
-    public function show($id)
-    {
-        $pet = Pet::find($id);
-        if($pet) return response()->json($pet);
-        return response()->json(['message' => 'Không tìm thấy'], 404);
+    public function create() {
+        return view('pets.create');
     }
 
-    // Thêm mới
-    public function store(Request $request)
-{
-    // Validate dữ liệu
-    $request->validate([
-        'customerID' => 'required',
-        'petName' => 'required',
-        'petImage' => 'nullable|image|max:2048'
-    ]);
+    public function store(Request $request) {
+        $request->validate([
+            'petName' => 'required',
+            'species' => 'required',
+            'petImage' => 'image|mimes:jpeg,png,jpg|max:2048',
+        ]);
 
-    $data = $request->all();
+        $data = $request->all();
+        $data['userID'] = Auth::user()->userID;
 
-    // Xử lý upload ảnh (như bài trước)
-    if ($request->hasFile('petImage')) {
-        $path = $request->file('petImage')->store('pets', 'public');
-        $data['petImage'] = '/storage/' . $path;
-    }
-
-    // Lưu vào DB
-    Pet::create($data);
-
-    // QUAN TRỌNG: Thay vì trả về JSON, ta quay lại trang form và báo thành công
-    return redirect()->back()->with('success', 'Đã thêm thú cưng thành công!');
-}
-    // Sửa
-    public function update(Request $request, $id)
-    {
-        $pet = Pet::find($id);
-        if($pet) {
-            $pet->update($request->all());
-            return response()->json($pet);
+        if ($request->hasFile('petImage')) {
+            $path = $request->file('petImage')->store('pets', 'public');
+            $data['petImage'] = $path;
         }
-        return response()->json(['message' => 'Lỗi'], 404);
+
+        Pet::create($data);
+        return redirect()->route('pets.index')->with('success', 'Thêm Boss thành công!');
     }
 
-    // Xóa
-    public function destroy($id)
-    {
-        if(Pet::destroy($id)) return response()->json(['message' => 'Đã xóa']);
-        return response()->json(['message' => 'Lỗi'], 404);
+    public function edit($id) {
+        $pet = Pet::find($id);
+
+        if (!$pet || $pet->userID != Auth::user()->userID) {
+            abort(403, 'Bạn không có quyền sửa thú cưng này!');
+        }
+
+        return view('pets.edit', compact('pet'));
+    }
+
+    public function update(Request $request, $id) {
+        $pet = Pet::find($id);
+
+        // Bảo mật
+        if (!$pet || $pet->userID != Auth::user()->userID) {
+            abort(403);
+        }
+
+        $data = $request->except(['petImage']);
+
+        if ($request->hasFile('petImage')) {
+            if ($pet->petImage) {
+                Storage::disk('public')->delete($pet->petImage);
+            }
+            $data['petImage'] = $request->file('petImage')->store('pets', 'public');
+        }
+
+        $pet->update($data);
+        return redirect()->route('pets.index')->with('success', 'Cập nhật thông tin thành công!');
+    }
+
+    public function destroy($id) {
+        $pet = Pet::find($id);
+
+        if (!$pet || $pet->userID != Auth::user()->userID) {
+            abort(403);
+        }
+
+        if ($pet->petImage) {
+            Storage::disk('public')->delete($pet->petImage);
+        }
+
+        $pet->delete();
+        return redirect()->route('pets.index')->with('success', 'Đã xóa thú cưng!');
     }
 }

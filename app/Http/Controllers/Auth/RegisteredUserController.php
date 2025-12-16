@@ -28,27 +28,34 @@ class RegisteredUserController extends Controller
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'contactNumber' => ['required', 'string', 'max:20'],
-            'address' => ['required', 'string', 'max:500'],
-        ]);
+        {
+            // 1. Validate (Kiểm tra dữ liệu đầu vào)
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                
+                // --- QUAN TRỌNG: Phải validate 2 trường mới này ---
+                'phone' => ['required', 'string', 'max:20'], 
+                'address' => ['required', 'string', 'max:255'],
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'contactNumber' => $request->contactNumber,
-            'address' => $request->address,
-        ]);
+            // 2. Tạo User và Lưu vào Database
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                
+        
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'role' => 'user',
+            ]);
 
-        event(new Registered($user));
+            event(new Registered($user));
 
-        Auth::login($user);
+            Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
-    }
+            return redirect(route('home', absolute: false));
+        }
 }

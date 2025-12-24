@@ -15,7 +15,7 @@
                         {{ __('Trang chủ') }}
                     </x-nav-link>
                     @if(Auth::user()->role == 'admin')
-                        <x-nav-link :href="route('admin.appointments.index')" :active="request()->routeIs('admin.*')" class="text-red-500 font-bold">
+                        <x-nav-link :href="route('admin.appointments.index')" :active="request()->routeIs('admin.*')">
                             {{ __('Quản Trị') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.services.index')" :active="request()->routeIs('admin.services.*')">

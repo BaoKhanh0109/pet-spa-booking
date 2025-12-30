@@ -48,4 +48,9 @@ class Employee extends Model
     {
         return $this->hasMany(WorkSchedule::class, 'employeeID', 'employeeID');
     }
+    public function services()
+    {
+        // Tham số: Model đích, Tên bảng trung gian, Khóa ngoại của model này, Khóa ngoại của model kia
+        return $this->belongsToMany(Service::class, 'employee_service', 'employeeID', 'serviceID');
+    }
 }

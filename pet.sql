@@ -5,15 +5,21 @@ use pet_care_db;
 CREATE TABLE services (
     serviceID INT PRIMARY KEY AUTO_INCREMENT,
     serviceName VARCHAR(100) NOT NULL,
+    serviceImg TEXT,
     description TEXT,
-    price DECIMAL(10, 2) NOT NULL
+    price DECIMAL(10, 2) NOT NULL,
+    category ENUM('beauty', 'medical', 'pet_care') NOT NULL DEFAULT 'beauty',
+    duration INT NOT NULL DEFAULT 60 COMMENT 'Thời gian thực hiện (phút)'
 );
+
 CREATE TABLE employees (
     employeeID INT PRIMARY KEY AUTO_INCREMENT,
     employeeName VARCHAR(100) NOT NULL,
-    position VARCHAR(50),
+    avatar TEXT,
+    role VARCHAR(50),
     phoneNumber VARCHAR(20),
-    email VARCHAR(100)
+    email VARCHAR(100),
+    info TEXT
 );
 CREATE TABLE work_schedules (
     scheduleID INT PRIMARY KEY AUTO_INCREMENT,
@@ -21,7 +27,6 @@ CREATE TABLE work_schedules (
     dayOfWeek VARCHAR(20),
     startTime TIME,
     endTime TIME,
-    isAvailable BOOLEAN DEFAULT 1,
     FOREIGN KEY (employeeID) REFERENCES employees(employeeID) ON DELETE CASCADE
 );
 CREATE TABLE employee_service (
@@ -51,7 +56,7 @@ CREATE TABLE pets (
     breed VARCHAR(50),
     weight DECIMAL(5, 2),
     age INT,
-    petImage VARCHAR(255),
+    petImage TEXT,
     medicalHistory TEXT,
     FOREIGN KEY (userID) REFERENCES users(userID) ON DELETE CASCADE
 );
@@ -60,11 +65,14 @@ CREATE TABLE appointments (
     userID INT NOT NULL,
     petID INT NOT NULL,
     employeeID INT,
-    serviceID INT NOT NULL,
+    serviceID INT,
     appointmentDate DATETIME,
+    endDate DATETIME,
     note TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(50) DEFAULT 'Pending',
+    booking_type ENUM('beauty', 'medical', 'pet_care') NOT NULL,
+    prefer_doctor TINYINT(1) DEFAULT 0,
     FOREIGN KEY (userID) REFERENCES users(userID),
     FOREIGN KEY (petID) REFERENCES pets(petID),
     FOREIGN KEY (employeeID) REFERENCES employees(employeeID)
@@ -107,15 +115,15 @@ CREATE TABLE review_details (
 USE pet_care_db;
 
 -- 1. Thêm Dịch vụ (Services)
-INSERT INTO services (serviceName, description, price) VALUES
-('Khám sức khỏe tổng quát', 'Kiểm tra nhiệt độ, tim phổi, tai mũi họng', 200000),
-('Tiêm vaccine 7 bệnh', 'Vaccine phòng các bệnh phổ biến cho chó', 250000),
-('Spa - Tắm gội', 'Tắm, sấy khô, chải lông, cắt móng', 300000),
-('Cắt tỉa lông (Styling)', 'Cắt tỉa tạo kiểu thẩm mỹ', 450000),
-('Trông giữ thú cưng (Ngày)', 'Giữ thú cưng 24h bao gồm ăn uống', 150000);
+INSERT INTO services (serviceName, description, price, category, duration) VALUES
+('Khám sức khỏe tổng quát', 'Kiểm tra nhiệt độ, tim phổi, tai mũi họng', 200000, 'medical', 30),
+('Tiêm vaccine 7 bệnh', 'Vaccine phòng các bệnh phổ biến cho chó', 250000, 'medical', 15),
+('Spa - Tắm gội', 'Tắm, sấy khô, chải lông, cắt móng', 300000, 'beauty', 60),
+('Cắt tỉa lông (Styling)', 'Cắt tỉa tạo kiểu thẩm mỹ', 450000, 'beauty', 90),
+('Trông giữ thú cưng (Ngày)', 'Giữ thú cưng 24h bao gồm ăn uống', 150000, 'pet_care', 1440);
 
 -- 2. Thêm Nhân viên (Employees)
-INSERT INTO employees (employeeName, position, phoneNumber, email) VALUES
+INSERT INTO employees (employeeName, role, phoneNumber, email) VALUES
 ('Bs. Nguyễn Văn An', 'Bác sĩ thú y', '0901111111', 'bs.an@petcare.com'),
 ('Bs. Lê Thị Lan', 'Bác sĩ thú y', '0902222222', 'bs.lan@petcare.com'),
 ('Trần Văn Hùng', 'Chuyên viên Grooming', '0903333333', 'hung.groomer@petcare.com'),
@@ -136,11 +144,34 @@ INSERT INTO employee_service (employeeID, serviceID) VALUES
 (4, 5), (4, 3);
 
 -- 4. Thêm Lịch làm việc (Work Schedules)
-INSERT INTO work_schedules (employeeID, dayOfWeek, startTime, endTime, isAvailable) VALUES
-(1, 'Monday', '08:00:00', '17:00:00', 1), -- Bs An làm thứ 2
-(3, 'Monday', '09:00:00', '18:00:00', 1), -- Hùng làm thứ 2
-(1, 'Tuesday', '08:00:00', '17:00:00', 1),
-(2, 'Wednesday', '08:00:00', '17:00:00', 1);
+INSERT INTO work_schedules (employeeID, dayOfWeek, startTime, endTime) VALUES
+-- Bs An - Bác sĩ thú y
+(1, 'Monday', '08:00:00', '17:00:00'),
+(1, 'Tuesday', '08:00:00', '17:00:00'),
+(1, 'Wednesday', '08:00:00', '17:00:00'),
+(1, 'Thursday', '08:00:00', '17:00:00'),
+(1, 'Friday', '08:00:00', '17:00:00'),
+-- Bs Lan - Bác sĩ thú y
+(2, 'Monday', '08:00:00', '17:00:00'),
+(2, 'Tuesday', '08:00:00', '17:00:00'),
+(2, 'Wednesday', '08:00:00', '17:00:00'),
+(2, 'Thursday', '08:00:00', '17:00:00'),
+(2, 'Saturday', '08:00:00', '12:00:00'),
+-- Hùng - Chuyên viên Grooming (làm đẹp)
+(3, 'Monday', '09:00:00', '18:00:00'),
+(3, 'Tuesday', '09:00:00', '18:00:00'),
+(3, 'Wednesday', '09:00:00', '18:00:00'),
+(3, 'Thursday', '09:00:00', '18:00:00'),
+(3, 'Friday', '09:00:00', '18:00:00'),
+(3, 'Saturday', '09:00:00', '17:00:00'),
+-- Mai - Nhân viên chăm sóc (spa + trông giữ)
+(4, 'Monday', '09:00:00', '18:00:00'),
+(4, 'Tuesday', '09:00:00', '18:00:00'),
+(4, 'Wednesday', '09:00:00', '18:00:00'),
+(4, 'Thursday', '09:00:00', '18:00:00'),
+(4, 'Friday', '09:00:00', '18:00:00'),
+(4, 'Saturday', '09:00:00', '17:00:00'),
+(4, 'Sunday', '09:00:00', '17:00:00');
 
 -- 5. Thêm Người dùng (Users)
 -- Password mặc định là: 'password' (đã hash bcrypt chuẩn Laravel)
@@ -156,33 +187,43 @@ INSERT INTO pets (userID, petName, species, breed, weight, age, medicalHistory, 
 (3, 'Lu', 'Chó', 'Golden', 25.0, 4, 'Sức khỏe tốt', 'lu.jpg');
 
 -- 7. Thêm Lịch hẹn (Appointments)
-INSERT INTO appointments (userID, petID, employeeID, serviceID, appointmentDate, note, status) VALUES
--- Lịch 1: Đã hoàn thành (Khám bệnh với Bs An)
-(2, 1, 1, 1, '2025-12-20 09:00:00', 'Bé bỏ ăn 2 ngày', 'Completed'),
--- Lịch 2: Đã hoàn thành (Spa với Hùng)
-(3, 3, 3, 3, '2025-12-21 14:00:00', 'Cắt móng kỹ giúp em', 'Completed'),
--- Lịch 3: Sắp tới (Tiêm vaccine với Bs Lan)
-(2, 2, 2, 2, '2025-12-28 10:00:00', 'Tiêm mũi nhắc lại', 'Pending');
+INSERT INTO appointments (userID, petID, employeeID, serviceID, appointmentDate, endDate, note, status, booking_type, prefer_doctor) VALUES
+-- Lịch 1: Medical - Khám bệnh (Completed)
+(2, 1, 1, 1, '2025-12-20 09:00:00', NULL, 'Bé bỏ ăn 2 ngày', 'Completed', 'medical', 1),
+-- Lịch 2: Beauty - Spa + Cắt tỉa (Completed) - không cần serviceID vì dùng appointment_services
+(3, 3, 3, NULL, '2025-12-21 14:00:00', NULL, 'Cắt móng kỹ giúp em', 'Completed', 'beauty', NULL),
+-- Lịch 3: Medical - Tiêm vaccine (Pending)
+(2, 2, 2, 2, '2025-12-28 10:00:00', NULL, 'Tiêm mũi nhắc lại', 'Pending', 'medical', NULL),
+-- Lịch 4: Pet Care - Trông giữ (Pending)
+(2, 1, 4, 5, '2025-12-31 08:00:00', '2026-01-03 18:00:00', 'Đi du lịch Tết, nhờ chăm sóc', 'Pending', 'pet_care', NULL),
+-- Lịch 5: Beauty - Spa đơn (Pending)
+(3, 3, 3, NULL, '2025-12-30 15:00:00', NULL, 'Spa thư giãn cuối năm', 'Pending', 'beauty', NULL),
+-- Lịch 6: Medical - Khám tổng quát (Completed)
+(3, 3, 1, 1, '2025-12-18 10:30:00', NULL, 'Kiểm tra định kỳ', 'Completed', 'medical', 1);
 
 -- 8. Thêm Chi tiết dịch vụ trong lịch hẹn (Appointment Services)
+-- Chỉ beauty booking mới dùng bảng này
 INSERT INTO appointment_services (appointmentID, serviceID) VALUES
-(1, 1), -- Lịch 1 làm dịch vụ Khám
-(2, 3), -- Lịch 2 làm dịch vụ Spa
-(2, 4); -- Lịch 2 làm thêm dịch vụ Cắt tỉa (Combo)
+(2, 3), -- Lịch 2 (beauty): Spa
+(2, 4), -- Lịch 2 (beauty): Cắt tỉa
+(5, 3); -- Lịch 5 (beauty): Spa
 
 -- 9. Thêm Thanh toán (Payments)
--- Chỉ tạo thanh toán cho các lịch đã Completed (1 và 2)
+-- Chỉ tạo thanh toán cho các lịch đã Completed (1, 2, 6)
 INSERT INTO payments (appointmentID, amount, paymentMethod) VALUES
-(1, 200000, 'Cash'),       -- Thanh toán cho Lịch 1
-(2, 750000, 'Credit Card'); -- Thanh toán cho Lịch 2 (300k Spa + 450k Cắt tỉa)
+(1, 200000, 'Cash'),       -- Lịch 1: Khám bệnh
+(2, 750000, 'Credit Card'), -- Lịch 2: Spa + Cắt tỉa (300k + 450k)
+(6, 200000, 'Cash');       -- Lịch 6: Khám tổng quát
 
 -- 10. Thêm Đánh giá (Reviews)
 INSERT INTO reviews (paymentID, reviewDate) VALUES
 (1, '2025-12-20 10:30:00'),
-(2, '2025-12-21 16:00:00');
+(2, '2025-12-21 16:00:00'),
+(3, '2025-12-18 11:30:00');
 
 -- 11. Thêm Chi tiết đánh giá (Review Details)
 INSERT INTO review_details (reviewID, serviceID, rating, comment) VALUES
 (1, 1, 5, 'Bác sĩ An rất nhẹ nhàng, khám kỹ.'),
 (2, 3, 4, 'Sạch sẽ thơm tho nhưng làm hơi lâu.'),
-(2, 4, 5, 'Cắt kiểu này rất đẹp, ưng ý.');
+(2, 4, 5, 'Cắt kiểu này rất đẹp, ưng ý.'),
+(3, 1, 5, 'Kiểm tra rất chi tiết, yên tâm!');

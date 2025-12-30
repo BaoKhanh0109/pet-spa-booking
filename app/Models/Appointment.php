@@ -25,8 +25,11 @@ class Appointment extends Model
         'employeeID', // Có thể null nếu chưa phân công nhân viên
         'serviceID',
         'appointmentDate',
+        'endDate',
         'note',
         'status', // Pending, Confirmed, Completed, Cancelled
+        'booking_type',
+        'prefer_doctor'
     ];
 
     // ==========================================
@@ -56,5 +59,11 @@ class Appointment extends Model
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'employeeID', 'employeeID');
+    }
+
+    // 5. Lịch hẹn có thể có nhiều dịch vụ (cho dịch vụ làm đẹp)
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'appointment_services', 'appointmentID', 'serviceID');
     }
 }

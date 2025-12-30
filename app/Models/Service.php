@@ -19,11 +19,17 @@ class Service extends Model
     protected $fillable = [
         'serviceName',
         'description',
-        'price'
+        'price',
+        'category',
+        'duration'
     ];
 
     // 4. Nếu bạn không muốn dùng created_at/updated_at thì set false, 
     // nhưng khuyên nên giữ để theo dõi lịch sử.
     public $timestamps = false;
-}
+        public function employees()
+        {
+            return $this->belongsToMany(Employee::class, 'employee_service', 'serviceID', 'employeeID');
+        }
+    }
 ?>

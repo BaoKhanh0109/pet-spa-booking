@@ -34,7 +34,7 @@
                                 alt="{{ $sv->serviceName }}" 
                                 class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
                              <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-bold text-blue-600 shadow-sm">
-                                 {{ number_format($sv->price) }} đ
+                                 {{ number_format($sv->price) }} 
                              </div>
                         </div>
 

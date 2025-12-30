@@ -18,6 +18,7 @@ class Service extends Model
     // 3. Các trường cho phép điền dữ liệu (Mass Assignment)
     protected $fillable = [
         'serviceName',
+        'serviceImage',
         'description',
         'price'
     ];
@@ -25,5 +26,10 @@ class Service extends Model
     // 4. Nếu bạn không muốn dùng created_at/updated_at thì set false, 
     // nhưng khuyên nên giữ để theo dõi lịch sử.
     public $timestamps = false;
+
+    public function employees()
+    {
+        return $this->belongsToMany(Employee::class, 'employee_service', 'serviceID', 'employeeID');
+    }
 }
 ?>

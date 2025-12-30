@@ -5,6 +5,7 @@ use pet_care_db;
 CREATE TABLE services (
     serviceID INT PRIMARY KEY AUTO_INCREMENT,
     serviceName VARCHAR(100) NOT NULL,
+    serviceImage VARCHAR(255),
     description TEXT,
     price DECIMAL(10, 2) NOT NULL
 );
@@ -23,6 +24,14 @@ CREATE TABLE work_schedules (
     endTime TIME,
     isAvailable BOOLEAN DEFAULT 1,
     FOREIGN KEY (employeeID) REFERENCES employees(employeeID) ON DELETE CASCADE
+);
+CREATE TABLE employee_service (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    employeeID INT NOT NULL,
+    serviceID INT NOT NULL,
+    FOREIGN KEY (employeeID) REFERENCES employees(employeeID) ON DELETE CASCADE,
+    FOREIGN KEY (serviceID) REFERENCES services(serviceID) ON DELETE CASCADE,
+    UNIQUE(employeeID, serviceID) 
 );
 CREATE TABLE users (
     userID INT PRIMARY KEY AUTO_INCREMENT,

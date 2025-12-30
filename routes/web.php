@@ -20,7 +20,7 @@ Route::middleware(['auth'])->group(function () {
     // 2. Route xử lý lưu lịch hẹn khi bấm nút Gửi
     Route::post('/dat-lich', [BookingController::class, 'store'])->name('booking.store');
 
-    // 3. Route xem lịch sử (như bài trước đã làm)
+    // 3. Route xem lịch sử đặt lịch
     Route::get('/lich-su-dat', [BookingController::class, 'history'])->name('booking.history');
     // Thêm route Lịch sử
     Route::get('/booking/history', [BookingController::class, 'history'])->name('booking.history');

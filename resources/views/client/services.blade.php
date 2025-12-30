@@ -30,13 +30,11 @@
                     <div class="group bg-white rounded-2xl shadow-sm hover:shadow-2xl transition duration-300 border border-gray-100 overflow-hidden flex flex-col h-full hover:-translate-y-1">
                         
                         <div class="h-56 overflow-hidden relative bg-gray-100">
-                             <img src="https://picsum.photos/seed/{{ $sv->serviceID }}/600/400" 
-                                alt="{{ $sv->serviceName }}" 
-                                class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
-                             <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-bold text-blue-600 shadow-sm">
-                                 {{ number_format($sv->price) }} đ
+                             <img src="{{ $sv->serviceImage ? asset('storage/' . $sv->serviceImage) : 'https://picsum.photos/seed/'.$sv->serviceID.'/600/400' }}" 
+                                  alt="{{ $sv->serviceName }}" 
+                                  class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                             
                              </div>
-                        </div>
 
                         <div class="p-8 flex-1 flex flex-col">
                             <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition">
@@ -47,9 +45,19 @@
                                 {{ $sv->description ?? 'Dịch vụ chất lượng cao, thực hiện bởi chuyên viên giàu kinh nghiệm.' }}
                             </p>
 
-                            <a href="{{ route('booking.create') }}" class="block w-full text-center bg-gray-50 text-blue-600 font-bold py-3.5 rounded-xl border border-blue-100 hover:bg-blue-600 hover:text-white hover:border-transparent transition duration-300 shadow-sm">
-                                Đặt Lịch Ngay
-                            </a>
+                            <div class="flex items-center justify-between gap-4 pt-4 border-t border-gray-50 mt-auto">
+                                <div class="flex flex-col">
+                                    <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Chi phí</span>
+                                    <span class="text-2xl font-extrabold text-blue-600">
+                                        {{ number_format($sv->price) }} <span class="text-lg">đ</span>
+                                    </span>
+                                </div>
+
+                                <a href="{{ route('booking.create') }}" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-900 transition duration-300 shadow-lg transform active:scale-95 whitespace-nowrap">
+                                    Đặt Lịch
+                                </a>
+                            </div>
+
                         </div>
                     </div>
                     @endforeach

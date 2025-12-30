@@ -19,7 +19,8 @@ class Service extends Model
     protected $fillable = [
         'serviceName',
         'description',
-        'price'
+        'price',
+        'serviceImage',
     ];
 
     // 4. Nếu bạn không muốn dùng created_at/updated_at thì set false, 

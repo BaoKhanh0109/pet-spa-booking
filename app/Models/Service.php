@@ -21,7 +21,8 @@ class Service extends Model
         'description',
         'price',
         'category',
-        'duration'
+        'duration',
+        'serviceImage'
     ];
 
     // 4. Nếu bạn không muốn dùng created_at/updated_at thì set false, 

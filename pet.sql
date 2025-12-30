@@ -9,7 +9,8 @@ CREATE TABLE services (
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
     category ENUM('beauty', 'medical', 'pet_care') NOT NULL DEFAULT 'beauty',
-    duration INT NOT NULL DEFAULT 60 COMMENT 'Thời gian thực hiện (phút)'
+    duration INT NOT NULL DEFAULT 60 COMMENT 'Thời gian thực hiện (phút)',
+    serviceImage VARCHAR(255)
 );
 
 CREATE TABLE employees (

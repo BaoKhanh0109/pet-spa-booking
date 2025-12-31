@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 30, 2025 at 07:04 PM
+-- Generation Time: Dec 31, 2025 at 01:54 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -136,41 +136,6 @@ INSERT INTO `employee_service` (`id`, `employeeID`, `serviceID`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `migrations`
---
-
-CREATE TABLE `migrations` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `migration` varchar(255) NOT NULL,
-  `batch` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `payments`
---
-
-CREATE TABLE `payments` (
-  `paymentID` int(11) NOT NULL,
-  `appointmentID` int(11) NOT NULL,
-  `amount` decimal(10,2) NOT NULL,
-  `paymentDate` datetime DEFAULT current_timestamp(),
-  `paymentMethod` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `payments`
---
-
-INSERT INTO `payments` (`paymentID`, `appointmentID`, `amount`, `paymentDate`, `paymentMethod`) VALUES
-(1, 1, 200000.00, '2025-12-30 20:19:33', 'Cash'),
-(2, 2, 750000.00, '2025-12-30 20:19:33', 'Credit Card'),
-(3, 6, 200000.00, '2025-12-30 20:19:33', 'Cash');
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `pets`
 --
 
@@ -197,51 +162,6 @@ INSERT INTO `pets` (`petID`, `userID`, `petName`, `species`, `breed`, `weight`, 
 (4, 1, 'Vàng', 'Chó', 'chó cỏ', 4.00, 2, 'pets/fTvtgJbEwxi2aYZtAaCz8shnVohzal37hCPHU3Qe.jpg', NULL),
 (5, 4, 'Vàng', 'Chó', 'Chó cỏ', 4.00, 2, 'pets/wegzd6iuaHsBgO7er6C2WFdVm4lMw8sEfJ3oZGrU.jpg', 'Không'),
 (6, 4, 'Phy', 'Mèo', 'Mèo Ai Cập', 2.00, 2, 'pets/cP0D7yz2oA9z20BgMIdsSUNJfElcCac4vAsgXlzz.jpg', NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `reviews`
---
-
-CREATE TABLE `reviews` (
-  `reviewID` int(11) NOT NULL,
-  `paymentID` int(11) NOT NULL,
-  `reviewDate` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `reviews`
---
-
-INSERT INTO `reviews` (`reviewID`, `paymentID`, `reviewDate`) VALUES
-(1, 1, '2025-12-20 10:30:00'),
-(2, 2, '2025-12-21 16:00:00'),
-(3, 3, '2025-12-18 11:30:00');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `review_details`
---
-
-CREATE TABLE `review_details` (
-  `review_detailsId` int(11) NOT NULL,
-  `reviewID` int(11) NOT NULL,
-  `serviceID` int(11) NOT NULL,
-  `rating` int(11) DEFAULT NULL CHECK (`rating` >= 1 and `rating` <= 5),
-  `comment` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `review_details`
---
-
-INSERT INTO `review_details` (`review_detailsId`, `reviewID`, `serviceID`, `rating`, `comment`) VALUES
-(1, 1, 1, 5, 'Bác sĩ An rất nhẹ nhàng, khám kỹ.'),
-(2, 2, 3, 4, 'Sạch sẽ thơm tho nhưng làm hơi lâu.'),
-(3, 2, 4, 5, 'Cắt kiểu này rất đẹp, ưng ý.'),
-(4, 3, 1, 5, 'Kiểm tra rất chi tiết, yên tâm!');
 
 -- --------------------------------------------------------
 
@@ -379,40 +299,11 @@ ALTER TABLE `employee_service`
   ADD KEY `serviceID` (`serviceID`);
 
 --
--- Indexes for table `migrations`
---
-ALTER TABLE `migrations`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `payments`
---
-ALTER TABLE `payments`
-  ADD PRIMARY KEY (`paymentID`),
-  ADD UNIQUE KEY `appointmentID` (`appointmentID`),
-  ADD UNIQUE KEY `appointmentID_2` (`appointmentID`);
-
---
 -- Indexes for table `pets`
 --
 ALTER TABLE `pets`
   ADD PRIMARY KEY (`petID`),
   ADD KEY `userID` (`userID`);
-
---
--- Indexes for table `reviews`
---
-ALTER TABLE `reviews`
-  ADD PRIMARY KEY (`reviewID`),
-  ADD UNIQUE KEY `paymentID` (`paymentID`);
-
---
--- Indexes for table `review_details`
---
-ALTER TABLE `review_details`
-  ADD PRIMARY KEY (`review_detailsId`),
-  ADD KEY `reviewID` (`reviewID`),
-  ADD KEY `serviceID` (`serviceID`);
 
 --
 -- Indexes for table `services`
@@ -463,34 +354,10 @@ ALTER TABLE `employee_service`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `migrations`
---
-ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `payments`
---
-ALTER TABLE `payments`
-  MODIFY `paymentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
 -- AUTO_INCREMENT for table `pets`
 --
 ALTER TABLE `pets`
   MODIFY `petID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `reviews`
---
-ALTER TABLE `reviews`
-  MODIFY `reviewID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `review_details`
---
-ALTER TABLE `review_details`
-  MODIFY `review_detailsId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `services`
@@ -537,29 +404,10 @@ ALTER TABLE `employee_service`
   ADD CONSTRAINT `employee_service_ibfk_2` FOREIGN KEY (`serviceID`) REFERENCES `services` (`serviceID`) ON DELETE CASCADE;
 
 --
--- Constraints for table `payments`
---
-ALTER TABLE `payments`
-  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`appointmentID`) REFERENCES `appointments` (`appointmentID`) ON DELETE CASCADE;
-
---
 -- Constraints for table `pets`
 --
 ALTER TABLE `pets`
   ADD CONSTRAINT `pets_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `users` (`userID`) ON DELETE CASCADE;
-
---
--- Constraints for table `reviews`
---
-ALTER TABLE `reviews`
-  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`paymentID`) REFERENCES `payments` (`paymentID`) ON DELETE CASCADE;
-
---
--- Constraints for table `review_details`
---
-ALTER TABLE `review_details`
-  ADD CONSTRAINT `review_details_ibfk_1` FOREIGN KEY (`reviewID`) REFERENCES `reviews` (`reviewID`) ON DELETE CASCADE,
-  ADD CONSTRAINT `review_details_ibfk_2` FOREIGN KEY (`serviceID`) REFERENCES `services` (`serviceID`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `work_schedules`

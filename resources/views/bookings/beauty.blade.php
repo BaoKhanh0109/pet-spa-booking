@@ -1,96 +1,79 @@
 <x-client-layout>
-    <div class="py-12 bg-gradient-to-br from-pink-50 to-purple-50 min-h-screen">
+    <div class="py-12 bg-blue-100 min-h-screen">
         <div class="max-w-3xl mx-auto px-4">
-            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
-                <div class="bg-gradient-to-r from-pink-500 to-purple-600 p-6 text-center">
-                    <h2 class="text-3xl font-bold text-white mb-2">💅 Đặt Lịch Làm Đẹp</h2>
-                    <p class="text-pink-100">Cho {{ $pet->petName }} xinh xắn hơn mỗi ngày</p>
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-blue-500 p-6 text-center">
+                    <h2 class="text-3xl font-bold text-white mb-1">Đặt lịch làm đẹp</h2>
+                    <p class="text-blue-100">Dịch vụ Spa & Grooming</p>
                 </div>
-                
-                <div class="p-8">
-                    <!-- Hiển thị thông báo lỗi -->
-                    @if(session('error'))
-                    <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert">
-                        <p class="font-bold">⚠️ Lỗi</p>
-                        <p>{{ session('error') }}</p>
-                    </div>
-                    @endif
 
-                    <!-- Hiển thị thông báo thành công -->
-                    @if(session('success'))
-                    <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg" role="alert">
-                        <p class="font-bold">✓ Thành công</p>
-                        <p>{{ session('success') }}</p>
-                    </div>
-                    @endif
+                <div class="p-8">
+                    @if(session('error') || session('success')) ... @endif
 
                     <form action="{{ route('booking.beauty.store') }}" method="POST" id="beautyForm">
                         @csrf
                         <input type="hidden" name="petID" value="{{ $pet->petID }}">
 
-                        <!-- Bước 1: Chọn dịch vụ -->
                         <div class="mb-8">
-                            <label class="block font-bold text-gray-700 mb-4 text-lg">
-                                <span class="text-pink-600">1.</span> Chọn dịch vụ (có thể chọn nhiều)
+                            <label class="block font-bold text-gray-800 mb-4 text-lg">
+                                Chọn dịch vụ
                             </label>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 @foreach($services as $service)
-                                <div class="service-item">
-                                    <label class="flex items-start p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-pink-400 hover:bg-pink-50 transition">
-                                        <input type="checkbox" name="service_ids[]" value="{{ $service->serviceID }}" 
-                                               class="service-checkbox mt-1 w-5 h-5 text-pink-600 rounded">
-                                        <div class="ml-3 flex-1">
-                                            <div class="font-semibold text-gray-800">{{ $service->serviceName }}</div>
-                                            <div class="text-sm text-gray-600">{{ $service->description }}</div>
-                                            <div class="text-pink-600 font-bold mt-2">{{ number_format($service->price) }}đ</div>
-                                        </div>
-                                    </label>
-                                </div>
+                                    <div class="service-item">
+                                        <label
+                                            class="flex items-start p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition bg-white shadow-sm">
+                                            <input type="checkbox" name="service_ids[]" value="{{ $service->serviceID }}"
+                                                class="service-checkbox mt-1 w-5 h-5 text-blue-600 focus:ring-blue-500 rounded border-gray-300">
+                                            <div class="ml-3 flex-1">
+                                                <div class="font-semibold text-gray-800">{{ $service->serviceName }}</div>
+                                                <div class="text-sm text-gray-500">{{ $service->description }}</div>
+                                                <div class="text-blue-700 font-bold mt-2">
+                                                    {{ number_format($service->price) }}đ
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
                                 @endforeach
                             </div>
                         </div>
 
-                        <!-- Bước 2: Chọn ngày giờ -->
                         <div class="mb-8">
-                            <label class="block font-bold text-gray-700 mb-3 text-lg">
-                                <span class="text-pink-600">2.</span> Chọn ngày và giờ hẹn
+                            <label class="block font-bold text-gray-800 mb-3 text-lg">
+                                Chọn ngày và giờ hẹn
                             </label>
-                            <input type="datetime-local" name="appointmentDate" id="appointmentDate" 
-                                   class="w-full border-2 border-gray-300 rounded-xl shadow-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition p-3" 
-                                   required>
+                            <input type="datetime-local" name="appointmentDate" id="appointmentDate"
+                                class="w-full border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition p-3"
+                                required>
                         </div>
 
-                        <!-- Bước 3: Hiển thị nhân viên rảnh -->
                         <div class="mb-8" id="staffSection" style="display: none;">
-                            <label class="block font-bold text-gray-700 mb-3 text-lg">
-                                <span class="text-pink-600">3.</span> Chọn nhân viên (hoặc để hệ thống tự chọn)
+                            <label class="block font-bold text-gray-800 mb-3 text-lg">
+                                Chọn nhân viên
                             </label>
-                            <div id="staffList" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <!-- Staff will be loaded here via AJAX -->
-                            </div>
+                            <div id="staffList" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"></div>
                             <div class="text-center">
-                                <label class="inline-flex items-center">
-                                    <input type="radio" name="staff_selection" value="auto" checked class="text-pink-600">
-                                    <span class="ml-2 text-gray-700">Để hệ thống tự động chọn nhân viên</span>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="staff_selection" value="auto" checked
+                                        class="text-blue-600 focus:ring-blue-500">
+                                    <span class="ml-2 text-gray-700">Để hệ thống tự động chọn</span>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Ghi chú -->
-                        <div class="mb-6">
-                            <label class="block font-bold text-gray-700 mb-2">Ghi chú</label>
-                            <textarea name="note" rows="3" 
-                                      class="w-full border-2 border-gray-300 rounded-xl shadow-sm focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition p-3" 
-                                      placeholder="Yêu cầu đặc biệt..."></textarea>
+                        <div class="mb-8">
+                            <label class="block font-bold text-gray-800 mb-2">Ghi chú</label>
+                            <textarea name="note" rows="3"
+                                class="w-full border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-200 transition p-3"></textarea>
                         </div>
 
-                        <div class="flex gap-4">
-                            <a href="{{ route('booking.select-category') }}" 
-                               class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 rounded-xl text-center transition">
-                                ← Quay lại
+                        <div class="flex gap-4 pt-4 border-t border-gray-100">
+                            <a href="{{ route('booking.select-category') }}"
+                                class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition text-center">
+                                Quay lại
                             </a>
-                            <button type="submit" 
-                                    class="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-105">
+                            <button type="submit"
+                                class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg shadow transition">
                                 Xác nhận đặt lịch
                             </button>
                         </div>
@@ -99,9 +82,8 @@
             </div>
         </div>
     </div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const serviceCheckboxes = document.querySelectorAll('.service-checkbox');
             const appointmentDate = document.getElementById('appointmentDate');
             const staffSection = document.getElementById('staffSection');
@@ -131,17 +113,17 @@
                     console.log('Fetching:', url);
 
                     fetch(url)
-                    .then(response => {
-                        console.log('Response status:', response.status);
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Staff data:', data);
-                        staffList.innerHTML = '';
-                        
-                        if (data.length > 0) {
-                            data.forEach(staff => {
-                                const staffCard = `
+                        .then(response => {
+                            console.log('Response status:', response.status);
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Staff data:', data);
+                            staffList.innerHTML = '';
+
+                            if (data.length > 0) {
+                                data.forEach(staff => {
+                                    const staffCard = `
                                     <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-pink-400 hover:bg-pink-50 transition">
                                         <input type="radio" name="employeeID" value="${staff.employeeID}" class="w-5 h-5 text-pink-600">
                                         <div class="ml-3">
@@ -150,19 +132,19 @@
                                         </div>
                                     </label>
                                 `;
-                                staffList.innerHTML += staffCard;
-                            });
+                                    staffList.innerHTML += staffCard;
+                                });
+                                staffSection.style.display = 'block';
+                            } else {
+                                staffList.innerHTML = '<div class="col-span-2 text-center text-gray-600 p-4">⚠️ Không có nhân viên rảnh vào thời gian này.<br><small>Hệ thống sẽ tự động sắp xếp lịch phù hợp.</small></div>';
+                                staffSection.style.display = 'block';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error loading staff:', error);
+                            staffList.innerHTML = '<div class="col-span-2 text-center text-red-600 p-4">❌ Có lỗi xảy ra khi tải danh sách nhân viên.<br><small>Vui lòng thử lại hoặc để hệ thống tự chọn.</small></div>';
                             staffSection.style.display = 'block';
-                        } else {
-                            staffList.innerHTML = '<div class="col-span-2 text-center text-gray-600 p-4">⚠️ Không có nhân viên rảnh vào thời gian này.<br><small>Hệ thống sẽ tự động sắp xếp lịch phù hợp.</small></div>';
-                            staffSection.style.display = 'block';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading staff:', error);
-                        staffList.innerHTML = '<div class="col-span-2 text-center text-red-600 p-4">❌ Có lỗi xảy ra khi tải danh sách nhân viên.<br><small>Vui lòng thử lại hoặc để hệ thống tự chọn.</small></div>';
-                        staffSection.style.display = 'block';
-                    });
+                        });
                 } else {
                     staffSection.style.display = 'none';
                 }
@@ -175,7 +157,7 @@
             appointmentDate.addEventListener('change', loadAvailableStaff);
 
             // Validation: ít nhất 1 dịch vụ
-            document.getElementById('beautyForm').addEventListener('submit', function(e) {
+            document.getElementById('beautyForm').addEventListener('submit', function (e) {
                 const checkedServices = Array.from(serviceCheckboxes).filter(cb => cb.checked);
                 if (checkedServices.length === 0) {
                     e.preventDefault();

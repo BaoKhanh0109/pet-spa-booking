@@ -46,6 +46,7 @@ CREATE TABLE users (
     phone VARCHAR(20) NOT NULL,
     address TEXT,
     role VARCHAR(50) DEFAULT 'user',
+    remember_token VARCHAR(100) NULL AFTER password,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -71,6 +72,7 @@ CREATE TABLE appointments (
     endDate DATETIME,
     note TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status VARCHAR(50) DEFAULT 'Pending',
     booking_type ENUM('beauty', 'medical', 'pet_care') NOT NULL,
     prefer_doctor TINYINT(1) DEFAULT 0,

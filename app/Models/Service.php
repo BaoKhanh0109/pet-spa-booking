@@ -18,6 +18,7 @@ class Service extends Model
     // 3. Các trường cho phép điền dữ liệu (Mass Assignment)
     protected $fillable = [
         'serviceName',
+        'serviceImage',
         'description',
         'price',
         'category',

@@ -40,6 +40,11 @@ Route::middleware(['auth'])->group(function () {
     // Lịch sử đặt lịch
     Route::get('/lich-su-dat', [BookingController::class, 'history'])->name('booking.history');
     Route::get('/booking/history', [BookingController::class, 'history'])->name('booking.history');
+    
+    // Routes chỉnh sửa và xóa lịch hẹn
+    Route::get('/booking/{id}/edit', [BookingController::class, 'edit'])->name('booking.edit');
+    Route::put('/booking/{id}', [BookingController::class, 'update'])->name('booking.update');
+    Route::delete('/booking/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
 });
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')

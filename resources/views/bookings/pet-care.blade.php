@@ -1,117 +1,96 @@
 <x-client-layout>
-    <div class="py-12 bg-gradient-to-br from-orange-50 to-amber-50 min-h-screen">
+    <div class="py-12 bg-gray-100 min-h-screen">
         <div class="max-w-2xl mx-auto px-4">
-            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
-                <div class="bg-gradient-to-r from-orange-500 to-amber-600 p-6 text-center">
-                    <h2 class="text-3xl font-bold text-white mb-2">🏠 Đặt Lịch Trông Giữ</h2>
-                    <p class="text-orange-100">Gửi {{ $pet->petName }} an tâm trong thời gian bạn bận</p>
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-blue-500 p-6 text-center">
+                    <h2 class="text-3xl font-bold text-white mb-2">Đặt lịch trông giữ</h2>
+                    <p class="text-blue-100">Dịch vụ lưu trú</p>
                 </div>
-                
+
                 <div class="p-8">
                     <form action="{{ route('booking.pet-care.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="petID" value="{{ $pet->petID }}">
 
-                        <!-- Thông tin dịch vụ -->
-                        <div class="mb-8 bg-orange-50 rounded-xl p-6">
-                            <div class="flex items-start">
-                                <div class="text-4xl mr-4">🏡</div>
-                                <div class="flex-1">
-                                    <h3 class="font-bold text-lg text-gray-800 mb-2">{{ $service->serviceName }}</h3>
-                                    <p class="text-gray-600 mb-3">{{ $service->description }}</p>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-orange-600 font-bold text-xl">{{ number_format($service->price) }}đ/ngày</span>
-                                        <span class="bg-orange-200 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                            ⭐ Dịch vụ trông giữ 24/7
-                                        </span>
-                                    </div>
-                                </div>
+                        <div class="mb-8 bg-blue-50 border border-blue-100 rounded-lg p-6">
+                            <h3 class="font-bold text-lg text-gray-800 mb-2">{{ $service->serviceName }}</h3>
+                            <p class="text-gray-600 mb-3">{{ $service->description }}</p>
+                            <div class="flex items-center justify-between">
+                                <span
+                                    class="text-blue-700 font-bold text-xl">{{ number_format($service->price) }}đ/ngày</span>
+                                <span
+                                    class="bg-white text-blue-800 px-3 py-1 rounded border border-blue-200 text-sm font-semibold">
+                                    Dịch vụ 24/7
+                                </span>
                             </div>
                         </div>
 
-                        <!-- Chọn ngày gửi -->
-                        <div class="mb-6">
-                            <label class="block font-bold text-gray-700 mb-3 text-lg">
-                                <span class="text-orange-600">1.</span> Ngày gửi Boss
-                            </label>
-                            <input type="date" name="startDate" id="startDate" 
-                                   class="w-full border-2 border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition p-3" 
-                                   required>
-                            <p class="text-sm text-gray-600 mt-2">📅 Ngày bạn muốn gửi thú cưng</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-2">
+                                    Ngày Gửi
+                                </label>
+                                <input type="date" name="startDate" id="startDate"
+                                    class="w-full border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition p-3"
+                                    required>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-2">
+                                    Ngày Đón
+                                </label>
+                                <input type="date" name="endDate" id="endDate"
+                                    class="w-full border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition p-3"
+                                    required>
+                            </div>
                         </div>
 
-                        <!-- Chọn ngày trả -->
-                        <div class="mb-6">
-                            <label class="block font-bold text-gray-700 mb-3 text-lg">
-                                <span class="text-orange-600">2.</span> Ngày đón Boss về
-                            </label>
-                            <input type="date" name="endDate" id="endDate" 
-                                   class="w-full border-2 border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition p-3" 
-                                   required>
-                            <p class="text-sm text-gray-600 mt-2">📅 Ngày bạn đón thú cưng về</p>
-                        </div>
-
-                        <!-- Hiển thị số ngày và tổng tiền -->
-                        <div id="summary" class="mb-6 bg-amber-50 rounded-xl p-5" style="display: none;">
-                            <h4 class="font-bold text-gray-700 mb-3 flex items-center">
-                                <span class="text-2xl mr-2">📋</span>
-                                Tổng quan đặt chỗ
-                            </h4>
-                            <div class="space-y-2 text-gray-700">
+                        <div id="summary" class="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-5"
+                            style="display: none;">
+                            <h4 class="font-bold text-gray-700 mb-3">Tổng quan</h4>
+                            <div class="space-y-2 text-gray-700 text-sm">
                                 <div class="flex justify-between">
-                                    <span>Số ngày trông giữ:</span>
+                                    <span>Thời gian:</span>
                                     <span id="totalDays" class="font-bold">0 ngày</span>
                                 </div>
-                                <div class="flex justify-between text-lg border-t-2 border-orange-200 pt-2 mt-2">
-                                    <span class="font-bold">Tổng tiền dự kiến:</span>
-                                    <span id="totalPrice" class="font-bold text-orange-600">0đ</span>
+                                <div class="flex justify-between text-base border-t border-gray-200 pt-2 mt-2">
+                                    <span class="font-bold">Tổng tiền:</span>
+                                    <span id="totalPrice" class="font-bold text-blue-600">0đ</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Ghi chú -->
                         <div class="mb-6">
                             <label class="block font-bold text-gray-700 mb-2">Ghi chú</label>
-                            <textarea name="note" rows="4" 
-                                      class="w-full border-2 border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition p-3" 
-                                      placeholder="Thói quen ăn uống, sở thích, lưu ý đặc biệt..."></textarea>
+                            <textarea name="note" rows="4"
+                                class="w-full border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition p-3"
+                                placeholder="Thói quen ăn uống, lưu ý..."></textarea>
                         </div>
 
-                        <!-- Thông tin bao gồm -->
-                        <div class="mb-8 bg-gradient-to-r from-orange-100 to-amber-100 rounded-xl p-5">
-                            <h4 class="font-bold text-gray-800 mb-3">✨ Dịch vụ bao gồm:</h4>
-                            <ul class="space-y-2 text-gray-700">
-                                <li class="flex items-center">
-                                    <span class="text-green-600 mr-2">✓</span>
-                                    <span>Chăm sóc 24/7</span>
+                        <div class="mb-8 border-t border-gray-100 pt-6">
+                            <h4 class="font-bold text-gray-800 mb-3 text-sm uppercase">Dịch vụ bao gồm</h4>
+                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-600 text-sm">
+                                <li class="flex items-center"><span
+                                        class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>Chăm sóc 24/7</li>
+                                <li class="flex items-center"><span
+                                        class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>Thức ăn theo chế độ
                                 </li>
-                                <li class="flex items-center">
-                                    <span class="text-green-600 mr-2">✓</span>
-                                    <span>Thức ăn theo chế độ</span>
+                                <li class="flex items-center"><span
+                                        class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>Vui chơi vận động
                                 </li>
-                                <li class="flex items-center">
-                                    <span class="text-green-600 mr-2">✓</span>
-                                    <span>Vui chơi và vận động</span>
-                                </li>
-                                <li class="flex items-center">
-                                    <span class="text-green-600 mr-2">✓</span>
-                                    <span>Theo dõi sức khỏe hàng ngày</span>
-                                </li>
-                                <li class="flex items-center">
-                                    <span class="text-green-600 mr-2">✓</span>
-                                    <span>Cập nhật hình ảnh qua app</span>
+                                <li class="flex items-center"><span
+                                        class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>Cập nhật hình ảnh
                                 </li>
                             </ul>
                         </div>
 
                         <div class="flex gap-4">
-                            <a href="{{ route('booking.select-category') }}" 
-                               class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 rounded-xl text-center transition">
-                                ← Quay lại
+                            <a href="{{ route('booking.select-category') }}"
+                                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg text-center transition">
+                                Quay lại
                             </a>
-                            <button type="submit" 
-                                    class="flex-1 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-105">
-                                Xác nhận đặt chỗ
+                            <button type="submit"
+                                class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg shadow transition">
+                                Xác nhận
                             </button>
                         </div>
                     </form>
@@ -121,7 +100,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const startDate = document.getElementById('startDate');
             const endDate = document.getElementById('endDate');
             const summary = document.getElementById('summary');
@@ -150,7 +129,7 @@
                 }
             }
 
-            startDate.addEventListener('change', function() {
+            startDate.addEventListener('change', function () {
                 endDate.min = this.value;
                 calculateTotal();
             });

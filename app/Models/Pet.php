@@ -19,4 +19,9 @@ class Pet extends Model
     public function user() {
         return $this->belongsTo(User::class, 'userID', 'userID');
     }
+
+    // Quan hệ với Appointments
+    public function appointments() {
+        return $this->hasMany(Appointment::class, 'petID', 'petID');
+    }
 }

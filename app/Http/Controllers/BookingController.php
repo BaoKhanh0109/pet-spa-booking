@@ -336,4 +336,184 @@ class BookingController extends Controller
 
         return view('bookings.history', compact('appointments'));
     }
+
+    public function edit($id) {
+        $appointment = Appointment::where('appointmentID', $id)
+                                  ->where('userID', Auth::user()->userID)
+                                  ->with(['pet', 'service', 'services', 'employee'])
+                                  ->firstOrFail();
+
+        if ($appointment->status !== 'Pending') {
+            return redirect()->route('booking.history')
+                           ->with('error', 'Chỉ có thể chỉnh sửa lịch hẹn đang chờ phê duyệt!');
+        }
+
+        $pets = Pet::where('userID', Auth::user()->userID)->get();
+
+        if ($appointment->booking_type === 'beauty') {
+            $services = Service::where('category', 'beauty')->get();
+            return view('bookings.edit-beauty', compact('appointment', 'services', 'pets'));
+        } elseif ($appointment->booking_type === 'medical') {
+            $services = Service::where('category', 'medical')->get();
+            $doctors = Employee::whereHas('services', function($q) {
+                $q->where('category', 'medical');
+            })->get();
+            return view('bookings.edit-medical', compact('appointment', 'services', 'doctors', 'pets'));
+        } else {
+            $service = Service::where('category', 'pet_care')->first();
+            return view('bookings.edit-pet-care', compact('appointment', 'service', 'pets'));
+        }
+    }
+
+    public function update(Request $request, $id) {
+        $appointment = Appointment::where('appointmentID', $id)
+                                  ->where('userID', Auth::user()->userID)
+                                  ->firstOrFail();
+
+        if ($appointment->status !== 'Pending') {
+            return redirect()->route('booking.history')
+                           ->with('error', 'Chỉ có thể chỉnh sửa lịch hẹn đang chờ phê duyệt!');
+        }
+
+        if ($appointment->booking_type === 'beauty') {
+            $request->validate([
+                'petID' => 'required',
+                'service_ids' => 'required|array',
+                'appointmentDate' => 'required|date',
+                'employeeID' => 'nullable|exists:employees,employeeID'
+            ]);
+
+            $totalDuration = Service::whereIn('serviceID', $request->service_ids)->sum('duration');
+            $employeeID = $request->employeeID;
+
+            if (!$employeeID) {
+                $employeeID = $this->autoAssignStaff($request->service_ids, $request->appointmentDate);
+                if (!$employeeID) {
+                    return redirect()->back()->withInput()
+                                   ->with('error', 'Không có nhân viên rảnh vào thời gian này!');
+                }
+            } else {
+                if ($this->hasTimeConflictExcept($employeeID, $request->appointmentDate, $totalDuration, $id)) {
+                    return redirect()->back()->withInput()
+                                   ->with('error', 'Nhân viên đã có lịch hẹn vào thời gian này!');
+                }
+            }
+
+            $appointment->update([
+                'petID' => $request->petID,
+                'employeeID' => $employeeID,
+                'appointmentDate' => $request->appointmentDate,
+                'note' => $request->note
+            ]);
+
+            $appointment->services()->sync($request->service_ids);
+
+        } elseif ($appointment->booking_type === 'medical') {
+            $request->validate([
+                'petID' => 'required',
+                'serviceID' => 'required|exists:services,serviceID',
+                'booking_method' => 'required|in:by_date,by_doctor',
+                'appointmentDate' => 'required|date',
+                'employeeID' => 'required_if:booking_method,by_doctor'
+            ]);
+
+            $employeeID = $request->employeeID;
+            $preferDoctor = $request->booking_method == 'by_doctor' ? 1 : 0;
+            $service = Service::find($request->serviceID);
+            $duration = $service ? $service->duration : 0;
+
+            if ($request->booking_method == 'by_date') {
+                $employeeID = $this->autoAssignDoctor($request->serviceID, $request->appointmentDate);
+                if (!$employeeID) {
+                    return redirect()->back()->withInput()
+                                   ->with('error', 'Không có bác sĩ rảnh vào thời gian này!');
+                }
+            } else {
+                if ($this->hasTimeConflictExcept($employeeID, $request->appointmentDate, $duration, $id)) {
+                    return redirect()->back()->withInput()
+                                   ->with('error', 'Bác sĩ đã có lịch hẹn vào thời gian này!');
+                }
+            }
+
+            $appointment->update([
+                'petID' => $request->petID,
+                'employeeID' => $employeeID,
+                'serviceID' => $request->serviceID,
+                'appointmentDate' => $request->appointmentDate,
+                'note' => $request->note,
+                'prefer_doctor' => $preferDoctor
+            ]);
+
+        } else {
+            $request->validate([
+                'petID' => 'required',
+                'startDate' => 'required|date',
+                'endDate' => 'required|date|after_or_equal:startDate'
+            ]);
+
+            $service = Service::where('category', 'pet_care')->first();
+            $employeeID = $this->autoAssignStaff([$service->serviceID], $request->startDate);
+
+            $appointment->update([
+                'petID' => $request->petID,
+                'employeeID' => $employeeID,
+                'appointmentDate' => $request->startDate,
+                'endDate' => $request->endDate,
+                'note' => $request->note
+            ]);
+        }
+
+        return redirect()->route('booking.history')
+                       ->with('success', 'Cập nhật lịch hẹn thành công!');
+    }
+
+    public function destroy($id) {
+        $appointment = Appointment::where('appointmentID', $id)
+                                  ->where('userID', Auth::user()->userID)
+                                  ->firstOrFail();
+
+        if ($appointment->status !== 'Pending') {
+            return redirect()->route('booking.history')
+                           ->with('error', 'Chỉ có thể xóa lịch hẹn đang chờ phê duyệt!');
+        }
+
+        if ($appointment->booking_type === 'beauty') {
+            $appointment->services()->detach();
+        }
+
+        $appointment->delete();
+
+        return redirect()->route('booking.history')
+                       ->with('success', 'Đã xóa lịch hẹn thành công!');
+    }
+
+    private function hasTimeConflictExcept($employeeId, $appointmentDate, $duration, $exceptId) {
+        $startTime = strtotime($appointmentDate);
+        $endTime = $startTime + ($duration * 60);
+        
+        $existingAppointments = Appointment::where('employeeID', $employeeId)
+            ->where('appointmentID', '!=', $exceptId)
+            ->whereDate('appointmentDate', date('Y-m-d', $startTime))
+            ->get();
+        
+        foreach($existingAppointments as $apt) {
+            $aptStart = strtotime($apt->appointmentDate);
+            
+            $aptDuration = 0;
+            if($apt->booking_type === 'beauty') {
+                $aptDuration = $apt->services()->sum('duration');
+            } else if($apt->booking_type === 'medical') {
+                $service = Service::find($apt->serviceID);
+                $aptDuration = $service ? $service->duration : 0;
+            }
+            
+            $aptEnd = $aptStart + ($aptDuration * 60);
+            
+            if(!($endTime <= $aptStart || $startTime >= $aptEnd)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 }

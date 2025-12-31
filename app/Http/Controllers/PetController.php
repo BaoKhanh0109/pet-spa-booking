@@ -75,6 +75,14 @@ class PetController extends Controller
             abort(403);
         }
 
+        // Kiểm tra xem thú cưng có lịch hẹn nào không
+        $appointmentCount = $pet->appointments()->count();
+        
+        if ($appointmentCount > 0) {
+            return redirect()->route('pets.index')
+                ->with('error', "Không thể xóa {$pet->petName}! Thú cưng này đang có {$appointmentCount} lịch hẹn. Vui lòng hủy các lịch hẹn trước khi xóa.");
+        }
+
         if ($pet->petImage) {
             Storage::disk('public')->delete($pet->petImage);
         }

@@ -20,16 +20,18 @@ class Service extends Model
         'serviceName',
         'serviceImage',
         'description',
-        'price'
+        'price',
+        'category',
+        'duration',
+        'serviceImage'
     ];
 
     // 4. Nếu bạn không muốn dùng created_at/updated_at thì set false, 
     // nhưng khuyên nên giữ để theo dõi lịch sử.
     public $timestamps = false;
-
-    public function employees()
-    {
-        return $this->belongsToMany(Employee::class, 'employee_service', 'serviceID', 'employeeID');
+        public function employees()
+        {
+            return $this->belongsToMany(Employee::class, 'employee_service', 'serviceID', 'employeeID');
+        }
     }
-}
 ?>

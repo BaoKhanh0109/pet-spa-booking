@@ -30,8 +30,6 @@ class WorkSchedule extends Model
     // 5. Ép kiểu dữ liệu (Casting) - Để khi lấy ra nó tự hiểu là đúng kiểu
     protected $casts = [
         'isAvailable' => 'boolean', // Tự chuyển 1/0 thành true/false
-        'startTime' => 'datetime:H:i', // Chỉ lấy Giờ:Phút
-        'endTime' => 'datetime:H:i',
     ];
 
     // ==========================================

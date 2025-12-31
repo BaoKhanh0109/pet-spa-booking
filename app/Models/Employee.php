@@ -29,7 +29,6 @@ class Employee extends Model
     
     public function appointments()
     {
-        // hasMany(ModelCon, 'khóa_ngoại_ở_bảng_con', 'khóa_chính_ở_bảng_cha')
         return $this->hasMany(Appointment::class, 'employeeID', 'employeeID');
     }
 

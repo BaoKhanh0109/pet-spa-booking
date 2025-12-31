@@ -15,8 +15,8 @@ class Appointment extends Model
     // 2. Khai báo khóa chính (QUAN TRỌNG: Vì bạn dùng appointmentID chứ không phải id)
     protected $primaryKey = 'appointmentID';
 
-    // 3. Tắt tự động cập nhật ngày giờ (Nếu bảng của bạn không có created_at, updated_at)
-    public $timestamps = false; 
+    // 3. Bật tự động cập nhật ngày giờ (để lưu thời điểm tạo/cập nhật)
+    public $timestamps = true; 
 
     // 4. Các cột được phép lưu dữ liệu (Mass Assignment)
     protected $fillable = [
@@ -25,8 +25,11 @@ class Appointment extends Model
         'employeeID', // Có thể null nếu chưa phân công nhân viên
         'serviceID',
         'appointmentDate',
+        'endDate',
         'note',
         'status', // Pending, Confirmed, Completed, Cancelled
+        'booking_type',
+        'prefer_doctor'
     ];
 
     // ==========================================
@@ -56,5 +59,11 @@ class Appointment extends Model
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'employeeID', 'employeeID');
+    }
+
+    // 5. Lịch hẹn có thể có nhiều dịch vụ (cho dịch vụ làm đẹp)
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'appointment_services', 'appointmentID', 'serviceID');
     }
 }

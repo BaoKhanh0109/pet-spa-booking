@@ -49,8 +49,7 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-blue-600 font-bold transition">Đăng nhập</a>
-                        <a href="{{ route('register') }}" class="bg-blue-600 text-white px-5 py-2.5 rounded-full hover:bg-blue-700 shadow-md font-bold transition transform hover:scale-105">Đăng ký ngay</a>
+                        <a href="{{ route('login') }}" class="bg-blue-600 text-white px-5 py-2.5 rounded-full hover:bg-blue-700 shadow-md font-bold transition transform hover:scale-105">Đăng nhập</a>
                     @endauth
                 </div>
             </div>

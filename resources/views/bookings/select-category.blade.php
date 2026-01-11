@@ -27,38 +27,48 @@
                         </label>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="service-card group cursor-pointer" data-category="beauty">
-                                <div
-                                    class="border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-blue-500 transition-all duration-300 bg-white h-full">
-                                    <div class="text-center">
-                                        <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600">Làm
-                                            Đẹp</h3>
-                                        <p class="text-gray-500 text-sm">Spa, tắm gội, cắt tỉa lông</p>
+                            @foreach($categories as $category)
+                                @php
+                                    // Map categoryID sang route name
+                                    $routeMap = [
+                                        1 => 'booking.beauty',
+                                        2 => 'booking.medical',
+                                        3 => 'booking.pet-care'
+                                    ];
+                                    $routeName = $routeMap[$category->categoryID] ?? null;
+                                    
+                                    // Màu sắc cho từng category
+                                    $colorMap = [
+                                        1 => 'blue',
+                                        2 => 'green',
+                                        3 => 'purple'
+                                    ];
+                                    $color = $colorMap[$category->categoryID] ?? 'gray';
+                                @endphp
+                                
+                                @if($routeName)
+                                    <div class="service-card group cursor-pointer" data-route="{{ $routeName }}">
+                                        <div class="border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-{{ $color }}-500 transition-all duration-300 bg-white h-full">
+                                            <div class="text-center">
+                                                <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-{{ $color }}-600">
+                                                    {{ $category->categoryName }}
+                                                </h3>
+                                                <p class="text-gray-500 text-sm">
+                                                    {{ $category->description }}
+                                                </p>
+                                                
+                                                @if($category->capacity)
+                                                    <div class="mt-3">
+                                                        <span class="inline-block bg-{{ $color }}-100 text-{{ $color }}-700 text-xs px-3 py-1 rounded-full font-semibold">
+                                                            Sức chứa: {{ $category->capacity }} chỗ
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            <div class="service-card group cursor-pointer" data-category="medical">
-                                <div
-                                    class="border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-blue-500 transition-all duration-300 bg-white h-full">
-                                    <div class="text-center">
-                                        <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600">Y Tế
-                                        </h3>
-                                        <p class="text-gray-500 text-sm">Khám bệnh, tiêm vaccine</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="service-card group cursor-pointer" data-category="pet_care">
-                                <div
-                                    class="border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-blue-500 transition-all duration-300 bg-white h-full">
-                                    <div class="text-center">
-                                        <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600">Trông
-                                            Giữ</h3>
-                                        <p class="text-gray-500 text-sm">Chăm sóc lưu trú 24/7</p>
-                                    </div>
-                                </div>
-                            </div>
+                                @endif
+                            @endforeach
                         </div>
                     </div>
 
@@ -83,14 +93,18 @@
                         petSelect.focus();
                         return;
                     }
-                    const category = this.dataset.category;
-                    let url = '';
-                    switch (category) {
-                        case 'beauty': url = '{{ route("booking.beauty") }}?petID=' + petID; break;
-                        case 'medical': url = '{{ route("booking.medical") }}?petID=' + petID; break;
-                        case 'pet_care': url = '{{ route("booking.pet-care") }}?petID=' + petID; break;
+                    
+                    const routeName = this.dataset.route;
+                    const routes = {
+                        'booking.beauty': '{{ route("booking.beauty") }}',
+                        'booking.medical': '{{ route("booking.medical") }}',
+                        'booking.pet-care': '{{ route("booking.pet-care") }}'
+                    };
+                    
+                    const url = routes[routeName];
+                    if (url) {
+                        window.location.href = url + '?petID=' + petID;
                     }
-                    window.location.href = url;
                 });
             });
         });

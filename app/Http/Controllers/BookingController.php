@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Service;
+use App\Models\ServiceCategory;
 use App\Models\Pet;
 use App\Models\Appointment;
 use App\Models\Employee;
@@ -12,18 +13,29 @@ use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
+    // Helper method để lấy services theo category ID
+    private function getServicesByCategoryID($categoryID) {
+        return Service::where('categoryID', $categoryID)->get();
+    }
+    
+    // Helper method để lấy 1 service theo category ID
+    private function getServiceByCategoryID($categoryID) {
+        return Service::where('categoryID', $categoryID)->first();
+    }
+    
     // Bước 1: Chọn loại dịch vụ (beauty, medical, pet_care)
     public function selectCategory() {
         $pets = Pet::where('userID', Auth::user()->userID)->get();
+        $categories = \App\Models\ServiceCategory::all(); // Lấy tất cả danh mục
         
-        return view('bookings.select-category', compact('pets'));
+        return view('bookings.select-category', compact('pets', 'categories'));
     }
 
     // Bước 2a: Hiển thị form đặt lịch làm đẹp
     public function createBeauty(Request $request) {
         $petID = $request->get('petID');
         $pet = Pet::where('petID', $petID)->first();
-        $services = Service::where('category', 'beauty')->get();
+        $services = $this->getServicesByCategoryID(1); // 1 = Làm đẹp
         
         return view('bookings.beauty', compact('services', 'pet'));
     }
@@ -32,9 +44,9 @@ class BookingController extends Controller
     public function createMedical(Request $request) {
         $petID = $request->get('petID');
         $pet = Pet::where('petID', $petID)->first();
-        $services = Service::where('category', 'medical')->get();
+        $services = $this->getServicesByCategoryID(2); // 2 = Y tế
         $doctors = Employee::whereHas('services', function($q) {
-            $q->where('category', 'medical');
+            $q->where('categoryID', 2); // 2 = Y tế
         })->get();
         
         return view('bookings.medical', compact('services', 'pet', 'doctors'));
@@ -44,7 +56,7 @@ class BookingController extends Controller
     public function createPetCare(Request $request) {
         $petID = $request->get('petID');
         $pet = Pet::where('petID', $petID)->first();
-        $service = Service::where('category', 'pet_care')->first();
+        $service = Service::with('category')->where('categoryID', 3)->first(); // 3 = Trông giữ
         
         return view('bookings.pet-care', compact('service', 'pet'));
     }
@@ -117,6 +129,12 @@ class BookingController extends Controller
         // Tính tổng thời gian dịch vụ
         $totalDuration = Service::whereIn('serviceID', $request->service_ids)->sum('duration');
 
+        // Kiểm tra xung đột thời gian cho thú cưng
+        if ($this->hasPetTimeConflict($request->petID, $request->appointmentDate, $totalDuration)) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Thú cưng đã có lịch hẹn vào thời gian này. Vui lòng chọn thời gian khác!');
+        }
+
         // Nếu không chọn nhân viên, hệ thống tự động chọn
         $employeeID = $request->employeeID;
         if (!$employeeID) {
@@ -133,16 +151,16 @@ class BookingController extends Controller
         }
 
         $appointment = Appointment::create([
+            'service_categories' => 1, // 1 = Làm đẹp
             'userID' => Auth::user()->userID,
             'petID' => $request->petID,
             'employeeID' => $employeeID,
             'appointmentDate' => $request->appointmentDate,
             'note' => $request->note,
-            'status' => 'Pending',
-            'booking_type' => 'beauty'
+            'status' => 'Pending'
         ]);
 
-        // Lưu các dịch vụ được chọn
+        // Lưu các dịch vụ được chọn vào appointment_services
         $appointment->services()->attach($request->service_ids);
 
         return redirect()->route('booking.history')->with('success', 'Đặt lịch làm đẹp thành công!');
@@ -163,6 +181,12 @@ class BookingController extends Controller
         $service = Service::find($request->serviceID);
         $duration = $service ? $service->duration : 0;
 
+        // Kiểm tra xung đột thời gian cho thú cưng
+        if ($this->hasPetTimeConflict($request->petID, $request->appointmentDate, $duration)) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Thú cưng đã có lịch hẹn vào thời gian này. Vui lòng chọn thời gian khác!');
+        }
+
         // Nếu chọn theo ngày, tự động chọn bác sĩ
         if ($request->booking_method == 'by_date') {
             $employeeID = $this->autoAssignDoctor($request->serviceID, $request->appointmentDate);
@@ -178,16 +202,18 @@ class BookingController extends Controller
         }
 
         $appointment = Appointment::create([
+            'service_categories' => 2, // 2 = Y tế
             'userID' => Auth::user()->userID,
             'petID' => $request->petID,
             'employeeID' => $employeeID,
-            'serviceID' => $request->serviceID,
             'appointmentDate' => $request->appointmentDate,
             'note' => $request->note,
             'status' => 'Pending',
-            'booking_type' => 'medical',
             'prefer_doctor' => $preferDoctor
         ]);
+
+        // Lưu service vào appointment_services
+        $appointment->services()->attach($request->serviceID);
 
         return redirect()->route('booking.history')->with('success', 'Đặt lịch khám bệnh thành công!');
     }
@@ -200,20 +226,60 @@ class BookingController extends Controller
             'endDate' => 'required|date|after_or_equal:startDate'
         ]);
 
-        $service = Service::where('category', 'pet_care')->first();
+        $service = Service::with('category')->where('categoryID', 3)->first(); // 3 = Trông giữ
+        
+        // Kiểm tra xung đột thời gian cho thú cưng
+        if ($this->hasPetTimeConflict($request->petID, $request->startDate, null, $request->endDate)) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Thú cưng đã có lịch hẹn vào khoảng thời gian này. Vui lòng chọn thời gian khác!');
+        }
+        
+        // Kiểm tra sức chứa của tiệm trong khoảng thời gian đã chọn
+        if ($service && $service->category && $service->category->capacity) {
+            $capacity = $service->category->capacity;
+            
+            // Đếm số lượng thú cưng đang được trông giữ trong khoảng thời gian này
+            $occupiedCount = Appointment::where('service_categories', 3) // 3 = Trông giữ
+            ->where('status', '!=', 'Cancelled')
+            ->where(function($query) use ($request) {
+                // Kiểm tra overlap: booking mới có overlap với booking cũ
+                $query->where(function($q) use ($request) {
+                    // Booking cũ bắt đầu trong khoảng booking mới
+                    $q->whereBetween('appointmentDate', [$request->startDate, $request->endDate]);
+                })->orWhere(function($q) use ($request) {
+                    // Booking cũ kết thúc trong khoảng booking mới
+                    $q->whereBetween('endDate', [$request->startDate, $request->endDate]);
+                })->orWhere(function($q) use ($request) {
+                    // Booking mới nằm hoàn toàn trong booking cũ
+                    $q->where('appointmentDate', '<=', $request->startDate)
+                      ->where('endDate', '>=', $request->endDate);
+                });
+            })
+            ->count();
+            
+            // Nếu đã hết chỗ
+            if ($occupiedCount >= $capacity) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', "Xin lỗi! Tiệm đã hết chỗ trống trong khoảng thời gian này (Sức chứa: {$capacity} chỗ). Vui lòng chọn khoảng thời gian khác hoặc liên hệ để được tư vấn.");
+            }
+        }
+
         $employeeID = $this->autoAssignStaff([$service->serviceID], $request->startDate);
 
         $appointment = Appointment::create([
+            'service_categories' => 3, // 3 = Trông giữ
             'userID' => Auth::user()->userID,
             'petID' => $request->petID,
             'employeeID' => $employeeID,
-            'serviceID' => $service->serviceID,
             'appointmentDate' => $request->startDate,
             'endDate' => $request->endDate,
             'note' => $request->note,
-            'status' => 'Pending',
-            'booking_type' => 'pet_care'
+            'status' => 'Pending'
         ]);
+
+        // Lưu service vào appointment_services
+        $appointment->services()->attach($service->serviceID);
 
         return redirect()->route('booking.history')->with('success', 'Đặt lịch trông giữ thành công!');
     }
@@ -258,16 +324,79 @@ class BookingController extends Controller
             
             // Tính duration của appointment hiện có
             $aptDuration = 0;
-            if($apt->booking_type === 'beauty') {
+            if($apt->service_categories == 1) { // 1 = Làm đẹp
                 $aptDuration = $apt->services()->sum('duration');
-            } else if($apt->booking_type === 'medical') {
-                $service = Service::find($apt->serviceID);
-                $aptDuration = $service ? $service->duration : 0;
+            } else if($apt->service_categories == 2) { // 2 = Y tế
+                // Lấy duration từ services relationship
+                $aptDuration = $apt->services()->sum('duration');
             }
             
             $aptEnd = $aptStart + ($aptDuration * 60);
             
             // Kiểm tra overlap: [startTime, endTime] với [aptStart, aptEnd]
+            if(!($endTime <= $aptStart || $startTime >= $aptEnd)) {
+                return true; // Có xung đột
+            }
+        }
+        
+        return false; // Không xung đột
+    }
+
+    // Kiểm tra xung đột thời gian cho cùng một thú cưng
+    private function hasPetTimeConflict($petID, $appointmentDate, $duration, $endDate = null) {
+        $startTime = strtotime($appointmentDate);
+        
+        // Nếu có endDate (dịch vụ trông giữ), kiểm tra overlap với khoảng thời gian
+        if ($endDate) {
+            $endTime = strtotime($endDate);
+            
+            $existingAppointments = Appointment::where('petID', $petID)
+                ->where('status', '!=', 'Cancelled')
+                ->where(function($query) use ($appointmentDate, $endDate) {
+                    $query->where(function($q) use ($appointmentDate, $endDate) {
+                        // Booking cũ bắt đầu trong khoảng booking mới
+                        $q->whereBetween('appointmentDate', [$appointmentDate, $endDate]);
+                    })->orWhere(function($q) use ($appointmentDate, $endDate) {
+                        // Booking cũ kết thúc trong khoảng booking mới
+                        $q->whereBetween('endDate', [$appointmentDate, $endDate]);
+                    })->orWhere(function($q) use ($appointmentDate, $endDate) {
+                        // Booking mới nằm hoàn toàn trong booking cũ
+                        $q->where('appointmentDate', '<=', $appointmentDate)
+                          ->where('endDate', '>=', $endDate);
+                    });
+                })
+                ->exists();
+                
+            return $existingAppointments;
+        }
+        
+        // Nếu không có endDate (dịch vụ làm đẹp, y tế), kiểm tra overlap theo duration
+        $endTime = $startTime + ($duration * 60);
+        
+        $existingAppointments = Appointment::where('petID', $petID)
+            ->where('status', '!=', 'Cancelled')
+            ->whereDate('appointmentDate', date('Y-m-d', $startTime))
+            ->get();
+        
+        foreach($existingAppointments as $apt) {
+            $aptStart = strtotime($apt->appointmentDate);
+            
+            // Tính duration của appointment hiện có
+            $aptDuration = 0;
+            if($apt->service_categories == 1 || $apt->service_categories == 2) {
+                $aptDuration = $apt->services()->sum('duration');
+            } else if($apt->service_categories == 3 && $apt->endDate) {
+                // Nếu là dịch vụ trông giữ, kiểm tra overlap với khoảng thời gian
+                $aptEnd = strtotime($apt->endDate);
+                if(!($endTime <= $aptStart || $startTime >= $aptEnd)) {
+                    return true; // Có xung đột
+                }
+                continue;
+            }
+            
+            $aptEnd = $aptStart + ($aptDuration * 60);
+            
+            // Kiểm tra overlap
             if(!($endTime <= $aptStart || $startTime >= $aptEnd)) {
                 return true; // Có xung đột
             }
@@ -315,22 +444,24 @@ class BookingController extends Controller
             'appointmentDate' => 'required|date',
         ]);
 
-        Appointment::create([
+        $appointment = Appointment::create([
+            'service_categories' => 1, // 1 = Làm đẹp (mặc định cho route cũ)
             'userID' => Auth::user()->userID,
             'petID' => $request->petID,
-            'serviceID' => $request->serviceID,
             'appointmentDate' => $request->appointmentDate,
             'note' => $request->note,
-            'status' => 'Pending',
-            'booking_type' => 'beauty'
+            'status' => 'Pending'
         ]);
+        
+        // Lưu service vào appointment_services
+        $appointment->services()->attach($request->serviceID);
 
         return redirect()->route('booking.history')->with('success', 'Đặt lịch thành công! Nhân viên sẽ sớm liên hệ.');
     }
     
     public function history() {
         $appointments = Appointment::where('userID', Auth::user()->userID)
-                        ->with(['pet', 'service', 'services', 'employee']) 
+                        ->with(['pet', 'serviceCategory', 'services', 'employee']) 
                         ->orderBy('appointmentDate', 'desc')
                         ->get();
 
@@ -340,7 +471,7 @@ class BookingController extends Controller
     public function edit($id) {
         $appointment = Appointment::where('appointmentID', $id)
                                   ->where('userID', Auth::user()->userID)
-                                  ->with(['pet', 'service', 'services', 'employee'])
+                                  ->with(['pet', 'serviceCategory', 'services', 'employee'])
                                   ->firstOrFail();
 
         if ($appointment->status !== 'Pending') {
@@ -350,17 +481,18 @@ class BookingController extends Controller
 
         $pets = Pet::where('userID', Auth::user()->userID)->get();
 
-        if ($appointment->booking_type === 'beauty') {
-            $services = Service::where('category', 'beauty')->get();
+        // Dùng service_categories thay vì booking_type
+        if ($appointment->service_categories == 1) { // 1 = Làm đẹp
+            $services = $this->getServicesByCategoryID(1);
             return view('bookings.edit-beauty', compact('appointment', 'services', 'pets'));
-        } elseif ($appointment->booking_type === 'medical') {
-            $services = Service::where('category', 'medical')->get();
+        } elseif ($appointment->service_categories == 2) { // 2 = Y tế
+            $services = $this->getServicesByCategoryID(2);
             $doctors = Employee::whereHas('services', function($q) {
-                $q->where('category', 'medical');
+                $q->where('categoryID', 2);
             })->get();
             return view('bookings.edit-medical', compact('appointment', 'services', 'doctors', 'pets'));
-        } else {
-            $service = Service::where('category', 'pet_care')->first();
+        } else { // 3 = Trông giữ
+            $service = Service::with('category')->where('categoryID', 3)->first();
             return view('bookings.edit-pet-care', compact('appointment', 'service', 'pets'));
         }
     }
@@ -375,7 +507,7 @@ class BookingController extends Controller
                            ->with('error', 'Chỉ có thể chỉnh sửa lịch hẹn đang chờ phê duyệt!');
         }
 
-        if ($appointment->booking_type === 'beauty') {
+        if ($appointment->service_categories == 1) { // 1 = Làm đẹp
             $request->validate([
                 'petID' => 'required',
                 'service_ids' => 'required|array',
@@ -408,7 +540,7 @@ class BookingController extends Controller
 
             $appointment->services()->sync($request->service_ids);
 
-        } elseif ($appointment->booking_type === 'medical') {
+        } elseif ($appointment->service_categories == 2) { // 2 = Y tế
             $request->validate([
                 'petID' => 'required',
                 'serviceID' => 'required|exists:services,serviceID',
@@ -451,7 +583,7 @@ class BookingController extends Controller
                 'endDate' => 'required|date|after_or_equal:startDate'
             ]);
 
-            $service = Service::where('category', 'pet_care')->first();
+            $service = Service::where('categoryID', 3)->first(); // 3 = Trông giữ
             $employeeID = $this->autoAssignStaff([$service->serviceID], $request->startDate);
 
             $appointment->update([
@@ -477,9 +609,8 @@ class BookingController extends Controller
                            ->with('error', 'Chỉ có thể xóa lịch hẹn đang chờ phê duyệt!');
         }
 
-        if ($appointment->booking_type === 'beauty') {
-            $appointment->services()->detach();
-        }
+        // Xóa services liên kết (tất cả categories đều có services)
+        $appointment->services()->detach();
 
         $appointment->delete();
 
@@ -500,11 +631,10 @@ class BookingController extends Controller
             $aptStart = strtotime($apt->appointmentDate);
             
             $aptDuration = 0;
-            if($apt->booking_type === 'beauty') {
+            if($apt->service_categories == 1) { // 1 = Làm đẹp
                 $aptDuration = $apt->services()->sum('duration');
-            } else if($apt->booking_type === 'medical') {
-                $service = Service::find($apt->serviceID);
-                $aptDuration = $service ? $service->duration : 0;
+            } else if($apt->service_categories == 2) { // 2 = Y tế
+                $aptDuration = $apt->services()->sum('duration');
             }
             
             $aptEnd = $aptStart + ($aptDuration * 60);

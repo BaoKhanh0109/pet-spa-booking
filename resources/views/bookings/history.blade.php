@@ -33,29 +33,32 @@
                         @foreach($appointments as $app)
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="py-4 px-6">
-                                    @if($app->booking_type == 'beauty')
+                                    @if($app->service_categories == 1)
                                         <span
                                             class="bg-blue-100 text-blue-700 py-1 px-3 rounded text-xs font-bold border border-blue-200">Làm
                                             đẹp</span>
-                                    @elseif($app->booking_type == 'medical')
+                                    @elseif($app->service_categories == 2)
                                         <span
-                                            class="bg-blue-100 text-blue-700 py-1 px-3 rounded text-xs font-bold border border-blue-200">Y
+                                            class="bg-green-100 text-green-700 py-1 px-3 rounded text-xs font-bold border border-green-200">Y
                                             tế</span>
+                                    @elseif($app->service_categories == 3)
+                                        <span
+                                            class="bg-purple-100 text-purple-700 py-1 px-3 rounded text-xs font-bold border border-purple-200">Trông
+                                            giữ</span>
                                     @else
                                         <span
-                                            class="bg-blue-100 text-blue-700 py-1 px-3 rounded text-xs font-bold border border-blue-200">Trông
-                                            giữ</span>
+                                            class="bg-gray-100 text-gray-700 py-1 px-3 rounded text-xs font-bold border border-gray-200">N/A</span>
                                     @endif
                                 </td>
                                 <td class="py-4 px-6 font-semibold text-gray-800">{{ $app->pet->petName }}</td>
                                 <td class="py-4 px-6">
-                                    @if($app->booking_type == 'beauty' && $app->services->count() > 0)
+                                    @if($app->services && $app->services->count() > 0)
                                         @foreach($app->services as $srv)
                                             <div class="text-sm border-b border-dashed border-gray-200 last:border-0 py-1">
                                                 {{ $srv->serviceName }}</div>
                                         @endforeach
                                     @else
-                                        {{ $app->service ? $app->service->serviceName : 'N/A' }}
+                                        <span class="text-gray-400 italic">Chưa có dịch vụ</span>
                                     @endif
                                 </td>
                                 <td class="py-4 px-6">

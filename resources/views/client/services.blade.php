@@ -52,14 +52,15 @@
                                 <div class="flex items-center justify-between gap-4 pt-4 border-t border-gray-50 mt-auto">
                                     <div class="flex flex-col">
                                         <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Chi phí</span>
-                                        <span class="text-2xl font-extrabold text-blue-600">
-                                            {{ number_format($sv->price) }} <span class="text-lg">đ</span>
+                                        <span class="text-lg font-bold text-blue-600">
+                                            Tùy size thú cưng
                                         </span>
+                                        <span class="text-xs text-gray-400">Xem chi tiết để biết giá</span>
                                     </div>
 
-                                    <a href="{{ route('booking.create') }}"
-                                        class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-900 transition duration-300 shadow-lg transform active:scale-95 whitespace-nowrap">
-                                        Đặt Lịch
+                                    <a href="{{ route('services.show', $sv->serviceID) }}"
+                                        class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition duration-300 shadow-lg transform active:scale-95 whitespace-nowrap">
+                                        Xem Chi Tiết
                                     </a>
                                 </div>
 

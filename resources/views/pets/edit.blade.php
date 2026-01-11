@@ -1,5 +1,5 @@
 <x-client-layout>
-    <div class="py-12 bg-blue-100 min-h-screen">
+    <div class="py-12 bg-gray-50 min-h-screen">
         <div class="max-w-2xl mx-auto px-4">
 
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -39,16 +39,31 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-5 mb-5">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
                             <div>
                                 <label class="block text-gray-700 font-bold mb-2">Tuổi (năm)</label>
                                 <input type="number" name="age" value="{{ $pet->age }}"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition p-3">
                             </div>
                             <div>
-                                <label class="block text-gray-700 font-bold mb-2">Cân nặng (kg)</label>
-                                <input type="number" step="0.1" name="weight" value="{{ $pet->weight }}"
-                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition p-3">
+                                <label class="block text-gray-700 font-bold mb-2">
+                                    Cân nặng (kg) <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" step="0.1" name="weight" value="{{ $pet->weight }}" required
+                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition p-3"
+                                    placeholder="VD: 15.5">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-bold mb-2">
+                                    Chiều dài lưng (cm)
+                                    <span class="text-xs text-gray-500">(để tính size chính xác)</span>
+                                </label>
+                                <input type="number" step="0.1" name="backLength" value="{{ $pet->backLength }}"
+                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition p-3"
+                                    placeholder="VD: 35">
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-info-circle"></i> Đo từ gáy đến gốc đuôi
+                                </p>
                             </div>
                         </div>
 

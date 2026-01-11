@@ -12,7 +12,7 @@ class Pet extends Model
 
     protected $fillable = [
         'userID', 'petName', 'species', 'breed', 
-        'weight', 'age', 'medicalHistory', 'petImage' 
+        'weight', 'backLength', 'age', 'medicalHistory', 'petImage' 
     ];
     
     // Quan hệ với User (để kiểm tra chính chủ)

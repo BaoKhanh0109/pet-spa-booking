@@ -11,6 +11,35 @@
         body {
             font-family: 'Nunito', sans-serif;
         }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+        
+        .animate-slide-in-right {
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        .animate-fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
     </style>
 </head>
 
@@ -81,6 +110,55 @@
         </div>
     </nav>
 
+    <!-- Flash Messages -->
+    @if(session('success'))
+        <div id="flash-message" class="fixed top-24 right-4 z-50 animate-slide-in-right">
+            <div class="bg-green-500 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 max-w-md">
+                <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="font-semibold">{{ session('success') }}</span>
+                <button onclick="document.getElementById('flash-message').remove()" class="ml-4 text-white hover:text-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div id="flash-message" class="fixed top-24 right-4 z-50 animate-slide-in-right">
+            <div class="bg-red-500 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 max-w-md">
+                <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="font-semibold">{{ session('error') }}</span>
+                <button onclick="document.getElementById('flash-message').remove()" class="ml-4 text-white hover:text-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    @endif
+
+    @if(session('info'))
+        <div id="flash-message" class="fixed top-24 right-4 z-50 animate-slide-in-right">
+            <div class="bg-blue-500 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 max-w-md">
+                <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="font-semibold">{{ session('info') }}</span>
+                <button onclick="document.getElementById('flash-message').remove()" class="ml-4 text-white hover:text-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    @endif
+
     <main class="flex-grow">
         {{ $slot }}
     </main>
@@ -93,6 +171,21 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Auto-hide flash messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessage = document.getElementById('flash-message');
+            if (flashMessage) {
+                setTimeout(() => {
+                    flashMessage.classList.add('animate-fade-out');
+                    setTimeout(() => {
+                        flashMessage.remove();
+                    }, 500);
+                }, 5000);
+            }
+        });
+    </script>
 
 </body>
 

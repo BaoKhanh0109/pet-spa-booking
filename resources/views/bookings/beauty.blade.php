@@ -53,10 +53,10 @@
                             </label>
                             <div id="staffList" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"></div>
                             <div class="text-center">
-                                <label class="inline-flex items-center cursor-pointer">
-                                    <input type="radio" name="staff_selection" value="auto" checked
-                                        class="text-blue-600 focus:ring-blue-500">
-                                    <span class="ml-2 text-gray-700">Để hệ thống tự động chọn</span>
+                                <label class="inline-flex items-center cursor-pointer p-3 rounded-lg border-2 border-gray-200 hover:border-blue-400 transition" id="autoSelectLabel">
+                                    <input type="radio" name="staff_selection" value="auto" id="autoSelectRadio" checked
+                                        class="text-blue-600 focus:ring-blue-500 w-5 h-5">
+                                    <span class="ml-2 text-gray-700 font-semibold">Để hệ thống tự động chọn</span>
                                 </label>
                             </div>
                         </div>
@@ -125,7 +125,7 @@
                                 data.forEach(staff => {
                                     const staffCard = `
                                     <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-pink-400 hover:bg-pink-50 transition">
-                                        <input type="radio" name="employeeID" value="${staff.employeeID}" class="w-5 h-5 text-pink-600">
+                                        <input type="radio" name="employeeID" value="${staff.employeeID}" class="staff-radio w-5 h-5 text-pink-600">
                                         <div class="ml-3">
                                             <div class="font-semibold text-gray-800">${staff.employeeName}</div>
                                             <div class="text-sm text-gray-600">${staff.role || 'Nhân viên'}</div>
@@ -135,6 +135,30 @@
                                     staffList.innerHTML += staffCard;
                                 });
                                 staffSection.style.display = 'block';
+                                
+                                // Thêm event listener để bỏ check "tự động chọn" khi chọn nhân viên
+                                setTimeout(() => {
+                                    const autoSelectRadio = document.getElementById('autoSelectRadio');
+                                    const autoSelectLabel = document.getElementById('autoSelectLabel');
+                                    
+                                    document.querySelectorAll('.staff-radio').forEach(radio => {
+                                        radio.addEventListener('change', function() {
+                                            if (this.checked) {
+                                                autoSelectRadio.checked = false;
+                                                autoSelectLabel.classList.remove('border-blue-500', 'bg-blue-50');
+                                                autoSelectLabel.classList.add('border-gray-200');
+                                                
+                                                // Highlight selected staff
+                                                document.querySelectorAll('.staff-radio').forEach(r => {
+                                                    r.closest('label').classList.remove('border-pink-400', 'bg-pink-50');
+                                                    r.closest('label').classList.add('border-gray-200');
+                                                });
+                                                this.closest('label').classList.remove('border-gray-200');
+                                                this.closest('label').classList.add('border-pink-400', 'bg-pink-50');
+                                            }
+                                        });
+                                    });
+                                }, 100);
                             } else {
                                 staffList.innerHTML = '<div class="col-span-2 text-center text-gray-600 p-4">⚠️ Không có nhân viên rảnh vào thời gian này.<br><small>Hệ thống sẽ tự động sắp xếp lịch phù hợp.</small></div>';
                                 staffSection.style.display = 'block';
@@ -155,6 +179,24 @@
             });
 
             appointmentDate.addEventListener('change', loadAvailableStaff);
+
+            // Xử lý khi chọn "tự động chọn" thì bỏ chọn nhân viên cụ thể
+            document.addEventListener('change', function(e) {
+                if (e.target.name === 'staff_selection' && e.target.value === 'auto') {
+                    const autoSelectLabel = document.getElementById('autoSelectLabel');
+                    
+                    // Bỏ chọn tất cả nhân viên
+                    document.querySelectorAll('input[name="employeeID"]').forEach(radio => {
+                        radio.checked = false;
+                        radio.closest('label').classList.remove('border-pink-400', 'bg-pink-50');
+                        radio.closest('label').classList.add('border-gray-200');
+                    });
+                    
+                    // Highlight "tự động chọn"
+                    autoSelectLabel.classList.remove('border-gray-200');
+                    autoSelectLabel.classList.add('border-blue-500', 'bg-blue-50');
+                }
+            });
 
             // Validation: ít nhất 1 dịch vụ
             document.getElementById('beautyForm').addEventListener('submit', function (e) {

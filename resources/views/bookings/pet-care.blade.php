@@ -8,6 +8,20 @@
                 </div>
 
                 <div class="p-8">
+                    @if(session('error'))
+                        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm animate-pulse">
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 text-red-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <p class="font-bold text-red-800">Không thể đặt lịch</p>
+                                    <p class="text-red-700 mt-1">{{ session('error') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <form action="{{ route('booking.pet-care.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="petID" value="{{ $pet->petID }}">
@@ -15,13 +29,15 @@
                         <div class="mb-8 bg-blue-50 border border-blue-100 rounded-lg p-6">
                             <h3 class="font-bold text-lg text-gray-800 mb-2">{{ $service->serviceName }}</h3>
                             <p class="text-gray-600 mb-3">{{ $service->description }}</p>
-                            <div class="flex items-center justify-between">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
                                 <span
                                     class="text-blue-700 font-bold text-xl">{{ number_format($service->price) }}đ/ngày</span>
-                                <span
-                                    class="bg-white text-blue-800 px-3 py-1 rounded border border-blue-200 text-sm font-semibold">
-                                    Dịch vụ 24/7
-                                </span>
+                                <div class="flex gap-2">
+                                    <span
+                                        class="bg-white text-blue-800 px-3 py-1 rounded border border-blue-200 text-sm font-semibold">
+                                        Dịch vụ 24/7
+                                    </span>
+                                </div>
                             </div>
                         </div>
 

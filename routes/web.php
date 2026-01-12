@@ -12,6 +12,9 @@ use App\Http\Controllers\AdminServiceController;
 // 1. Trang chủ (Không cần đăng nhập cũng xem được)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/dich-vu', [ServiceController::class, 'index'])->name('client.services');
+Route::get('/dich-vu/{id}', [ServiceController::class, 'show'])->name('services.show');
+Route::post('/dich-vu/tinh-gia', [ServiceController::class, 'calculatePrice'])->name('services.calculate-price')->middleware('auth');
+
 // 2. Nhóm các trang CẦN ĐĂNG NHẬP
 Route::middleware(['auth'])->group(function () {
     // Routes đặt lịch mới theo danh mục
@@ -59,7 +62,13 @@ Route::middleware(['auth', 'admin'])
         ->name('appointments.index');
 
     Route::get('/appointments/{id}/{status}', [App\Http\Controllers\AdminController::class, 'updateStatus'])
-        ->name('appointments.status'); 
+        ->name('appointments.status');
+    
+    // Routes quản lý nhân viên
+    Route::resource('employees', App\Http\Controllers\Admin\EmployeeController::class);
+    
+    // Routes quản lý chức vụ
+    Route::resource('roles', App\Http\Controllers\Admin\EmployeeRoleController::class);
 });
 
 

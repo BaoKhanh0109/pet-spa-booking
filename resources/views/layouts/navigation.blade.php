@@ -22,6 +22,12 @@
                         <x-nav-link :href="route('admin.services.index')" :active="request()->routeIs('admin.services.*')">
                             {{ __('Quản lý Dịch Vụ') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.employees.index')" :active="request()->routeIs('admin.employees.*')">
+                            {{ __('Quản lý Nhân viên') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.roles.index')" :active="request()->routeIs('admin.roles.*')">
+                            {{ __('Quản lý Chức vụ') }}
+                        </x-nav-link>
                     @endif
                 </div>
             </div>

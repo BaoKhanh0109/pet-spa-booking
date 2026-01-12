@@ -20,15 +20,14 @@ class Appointment extends Model
 
     // 4. Các cột được phép lưu dữ liệu (Mass Assignment)
     protected $fillable = [
+        'service_categories', // FK tới service_categories
         'userID',
         'petID',
         'employeeID', // Có thể null nếu chưa phân công nhân viên
-        'serviceID',
         'appointmentDate',
         'endDate',
         'note',
         'status', // Pending, Confirmed, Completed, Cancelled
-        'booking_type',
         'prefer_doctor'
     ];
 
@@ -49,10 +48,10 @@ class Appointment extends Model
         return $this->belongsTo(Pet::class, 'petID', 'petID');
     }
 
-    // 3. Lịch hẹn thuộc về 1 Dịch vụ (Service)
-    public function service()
+    // 3. Lịch hẹn thuộc về 1 Service Category
+    public function serviceCategory()
     {
-        return $this->belongsTo(Service::class, 'serviceID', 'serviceID');
+        return $this->belongsTo(ServiceCategory::class, 'service_categories', 'categoryID');
     }
 
     // 4. Lịch hẹn được làm bởi 1 Nhân viên (Employee) - Tùy chọn
@@ -61,7 +60,7 @@ class Appointment extends Model
         return $this->belongsTo(Employee::class, 'employeeID', 'employeeID');
     }
 
-    // 5. Lịch hẹn có thể có nhiều dịch vụ (cho dịch vụ làm đẹp)
+    // 5. Lịch hẹn có nhiều dịch vụ cụ thể (thông qua appointment_services)
     public function services()
     {
         return $this->belongsToMany(Service::class, 'appointment_services', 'appointmentID', 'serviceID');

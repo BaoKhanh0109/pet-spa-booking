@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AdminServiceController;
+use App\Http\Controllers\GoogleAuthController;
 
 // 1. Trang chủ (Không cần đăng nhập cũng xem được)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -95,4 +96,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/my-pets/{id}', [PetController::class, 'update'])->name('pets.update');
     Route::delete('/my-pets/{id}', [PetController::class, 'destroy'])->name('pets.destroy');
 });
+
+// Google OAuth Routes
+Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
+
 require __DIR__.'/auth.php';

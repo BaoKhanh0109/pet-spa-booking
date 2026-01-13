@@ -1,31 +1,6 @@
     <x-client-layout>
     <div class="bg-gradient-to-br from-blue-50 to-white py-16 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <!-- Breadcrumb -->
-            <div class="mb-8">
-                <nav class="flex" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                        <li class="inline-flex items-center">
-                            <a href="{{ route('home') }}" class="text-gray-600 hover:text-blue-600">
-                                <i class="fas fa-home mr-2"></i>Trang chủ
-                            </a>
-                        </li>
-                        <li>
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                                <a href="{{ route('client.services') }}" class="text-gray-600 hover:text-blue-600">Dịch vụ</a>
-                            </div>
-                        </li>
-                        <li aria-current="page">
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                                <span class="text-gray-800 font-semibold">{{ $service->serviceName }}</span>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
-            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 
@@ -41,11 +16,11 @@
                     <div class="bg-white rounded-xl p-6 shadow-lg">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">
                             <i class="fas fa-tag text-blue-600 mr-2"></i>Thông tin dịch vụ
-                        </h3>
+                        </h3>   
                         <div class="space-y-3">
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-600">Danh mục:</span>
-                                <span class="px-4 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                                <span class="font-semibold">
                                     {{ $service->category->categoryName ?? 'Chung' }}
                                 </span>
                             </div>
@@ -55,12 +30,18 @@
                             </div>
                         </div>
                     </div>
+                    <div class="mb-6">
+                        <a href="{{ route('client.services') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Quay lại
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Thông tin chi tiết -->
                 <div class="space-y-6">
                     <div class="bg-white rounded-2xl p-8 shadow-xl">
-                        <h1 class="text-4xl font-extrabold text-gray-900 mb-4">
+                        <h1 class="text-xl font-extrabold text-gray-900 mb-4">
                             {{ $service->serviceName }}
                         </h1>
                         
@@ -69,7 +50,7 @@
                         </p>
 
                         <!-- Bảng giá theo size -->
-                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6">
+                        <!--<div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6">
                             <h3 class="text-xl font-bold text-gray-800 mb-4">
                                 <i class="fas fa-dollar-sign text-blue-600 mr-2"></i>Bảng giá theo kích cỡ
                             </h3>
@@ -120,7 +101,7 @@
                             <p class="text-xs text-gray-500 mt-4 text-center italic">
                                 * Size được xác định dựa trên cân nặng và chiều dài lưng của thú cưng
                             </p>
-                        </div>
+                        </div>-->
 
                         @auth
                             <!-- Chọn thú cưng để xem giá chính xác -->
@@ -141,7 +122,7 @@
 
                                     <!-- Hiển thị giá sau khi chọn -->
                                     <div id="priceResult" class="hidden">
-                                        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border-2 border-blue-200">
+                                        <div class="bg-blue-50 rounded-lg p-6 border-2 border-blue-200">
                                             <div class="flex items-center justify-between mb-3">
                                                 <div>
                                                     <span class="text-sm text-gray-600">Thú cưng:</span>
@@ -163,7 +144,7 @@
                                             </div>
                                         </div>
                                         
-                                        <a href="{{ route('booking.select-category') }}" 
+                                        <a href="#" id="bookNowBtn"
                                             class="mt-4 w-full block text-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition duration-300 shadow-lg transform hover:scale-105">
                                             <i class="fas fa-calendar-check mr-2"></i>Đặt Lịch Ngay
                                         </a>
@@ -197,8 +178,14 @@
     @auth
     @if($pets->count() > 0)
     <script>
-        document.getElementById('petSelector').addEventListener('change', function() {
+        const petSelector = document.getElementById('petSelector');
+        const bookNowBtn = document.getElementById('bookNowBtn');
+        let selectedPetID = null;
+
+        petSelector.addEventListener('change', function() {
             const petID = this.value;
+            selectedPetID = petID;
+            
             if (!petID) {
                 document.getElementById('priceResult').classList.add('hidden');
                 return;
@@ -241,6 +228,29 @@
                 console.error('Error:', error);
                 alert('Có lỗi xảy ra khi tính giá. Vui lòng thử lại!');
             });
+        });
+
+        // Xử lý nút Đặt Lịch Ngay
+        bookNowBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!selectedPetID) {
+                alert('Vui lòng chọn thú cưng trước!');
+                return;
+            }
+            
+            // Chuyển đến trang booking với petID và serviceID
+            const categoryID = {{ $service->categoryID }};
+            let bookingUrl = '';
+            
+            if (categoryID === 1) { // Beauty
+                bookingUrl = '{{ route("booking.beauty") }}?petID=' + selectedPetID + '&serviceID={{ $service->serviceID }}';
+            } else if (categoryID === 2) { // Medical
+                bookingUrl = '{{ route("booking.medical") }}?petID=' + selectedPetID + '&serviceID={{ $service->serviceID }}';
+            } else if (categoryID === 3) { // Pet Care
+                bookingUrl = '{{ route("booking.pet-care") }}?petID=' + selectedPetID;
+            }
+            
+            window.location.href = bookingUrl;
         });
     </script>
     @endif

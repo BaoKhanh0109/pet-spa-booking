@@ -9,13 +9,10 @@ class Service extends Model
 {
     use HasFactory;
 
-    // 1. Khai báo tên bảng (nếu không theo chuẩn số nhiều)
     protected $table = 'services';
-
-    // 2. Khai báo khóa chính (QUAN TRỌNG vì bạn dùng serviceID)
     protected $primaryKey = 'serviceID';
-
-    // 3. Các trường cho phép điền dữ liệu (Mass Assignment)
+    public $timestamps = false;
+    
     protected $fillable = [
         'serviceName',
         'description',
@@ -24,12 +21,7 @@ class Service extends Model
         'duration',
         'serviceImage'
     ];
-
-    // 4. Nếu bạn không muốn dùng created_at/updated_at thì set false, 
-    // nhưng khuyên nên giữ để theo dõi lịch sử.
-    public $timestamps = false;
     
-    // Relationship: Service thuộc về một category
     public function category()
     {
         return $this->belongsTo(ServiceCategory::class, 'categoryID', 'categoryID');
@@ -39,5 +31,9 @@ class Service extends Model
     {
         return $this->belongsToMany(Employee::class, 'employee_service', 'serviceID', 'employeeID');
     }
+
+    public function appointments()
+    {
+        return $this->belongsToMany(Appointment::class, 'appointment_services', 'serviceID', 'appointmentID');
+    }
 }
-?>

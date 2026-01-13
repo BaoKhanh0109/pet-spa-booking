@@ -60,23 +60,42 @@
                             </div>
 
                             <div class="p-6 flex-1 flex flex-col">
-                                <div class="flex justify-between items-start mb-2">
+                                <div class="flex justify-between items-start mb-3">
                                     <h3 class="text-2xl font-bold text-gray-800">{{ $pet->petName }}</h3>
-                                    <span
-                                        class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-md">{{ $pet->breed ?? 'Chưa rõ giống' }}</span>
                                 </div>
 
-                                <div class="space-y-2 text-gray-600 text-sm mb-6 flex-1">
-                                    <p class="flex items-center gap-2">
-                                        Tuổi: <span class="font-semibold text-gray-800">{{ $pet->age ?? '?' }}</span>
-                                    </p>
-                                    <p class="flex items-center gap-2">
-                                        Cân nặng: <span class="font-semibold text-gray-800">{{ $pet->weight ?? '?' }} kg</span>
-                                    </p>
+                                <div class="space-y-2 text-gray-600 text-sm mb-4 flex-1">
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                                            <span class="text-gray-500">Giống:</span>
+                                            <span class="font-semibold text-gray-800">{{ $pet->breed ?? 'N/A' }}</span>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                                            <span class="text-gray-500">Tuổi:</span>
+                                            <span class="font-semibold text-gray-800">{{ $pet->age ?? 'N/A' }}</span>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                                            <span class="text-gray-500">Cân nặng:</span>
+                                            <span class="font-semibold text-gray-800">{{ $pet->weight ? $pet->weight . ' kg' : 'N/A' }}</span>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                                            <span class="text-gray-500">Chiều dài:</span>
+                                            <span class="font-semibold text-gray-800">{{ $pet->backLength ? $pet->backLength . ' cm' : 'N/A' }}</span>
+                                        </div>
+                                    </div>
+                                    
                                     @if($pet->medicalHistory)
-                                        <p class="flex items-start gap-2 mt-2 pt-2 border-t border-gray-100">
-                                            <span class="italic">{{ Str::limit($pet->medicalHistory, 40) }}</span>
-                                        </p>
+                                        <div class="mt-3 pt-3 border-t border-gray-200">
+                                            <p class="text-gray-500 font-semibold mb-1 flex items-center gap-1">
+                                                Lịch sử y tế:
+                                            </p>
+                                            <p class="text-gray-700      bg-gray-50 p-2 rounded">
+                                                {{ Str::limit($pet->medicalHistory, 80) }}
+                                            </p>
+                                        </div>
                                     @endif
                                 </div>
 

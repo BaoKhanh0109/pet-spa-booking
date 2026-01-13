@@ -24,4 +24,10 @@ class ServiceCategory extends Model
     {
         return $this->hasMany(Service::class, 'categoryID', 'categoryID');
     }
+
+    // Relationship: Một category có nhiều appointments
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'service_categories', 'categoryID');
+    }
 }

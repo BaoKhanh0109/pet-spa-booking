@@ -30,8 +30,12 @@
                             <h3 class="font-bold text-lg text-gray-800 mb-2">{{ $service->serviceName }}</h3>
                             <p class="text-gray-600 mb-3">{{ $service->description }}</p>
                             <div class="flex items-center justify-between flex-wrap gap-2">
-                                <span
-                                    class="text-blue-700 font-bold text-xl">{{ number_format($service->price) }}đ/ngày</span>
+                                <div>
+                                    <span class="text-blue-700 font-bold text-xl">{{ number_format($service->adjustedPrice) }}đ/ngày</span>
+                                    <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2">
+                                        Size {{ $service->petSize }}
+                                    </span>
+                                </div>
                                 <div class="flex gap-2">
                                     <span
                                         class="bg-white text-blue-800 px-3 py-1 rounded border border-blue-200 text-sm font-semibold">
@@ -122,7 +126,7 @@
             const summary = document.getElementById('summary');
             const totalDays = document.getElementById('totalDays');
             const totalPrice = document.getElementById('totalPrice');
-            const pricePerDay = {{ $service->price }};
+            const pricePerDay = {{ $service->adjustedPrice }};
 
             // Set min date to today
             const today = new Date().toISOString().split('T')[0];

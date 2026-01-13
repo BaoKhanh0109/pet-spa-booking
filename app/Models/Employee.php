@@ -17,10 +17,18 @@ class Employee extends Model
 
     protected $fillable = [
         'employeeName',
-        'position',     // Ví dụ: Bác sĩ, Nhân viên spa, Tiếp tân
+        'avatar',
+        'roleID',
         'phoneNumber',
         'email',
+        'info',
     ];
+
+    // Relationship: Employee thuộc về một role
+    public function role()
+    {
+        return $this->belongsTo(EmployeeRole::class, 'roleID', 'roleID');
+    }
 
     public function services()
     {

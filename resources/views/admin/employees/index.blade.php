@@ -74,10 +74,10 @@
 
                                 <td class="py-4 px-6">
                                     <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        @if(Str::contains($employee->role, 'Bác sĩ')) bg-blue-100 text-blue-700
-                                        @elseif(Str::contains($employee->role, 'Grooming')) bg-purple-100 text-purple-700
+                                        @if($employee->role && Str::contains($employee->role->roleName, 'Bác sĩ')) bg-blue-100 text-blue-700
+                                        @elseif($employee->role && Str::contains($employee->role->roleName, 'Grooming')) bg-purple-100 text-purple-700
                                         @else bg-green-100 text-green-700 @endif">
-                                        {{ $employee->role }}
+                                        {{ $employee->role ? $employee->role->roleName : 'Chưa có chức vụ' }}
                                     </span>
                                 </td>
 

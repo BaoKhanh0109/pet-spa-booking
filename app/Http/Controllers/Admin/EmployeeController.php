@@ -16,7 +16,7 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-        $employees = Employee::with('services')->paginate(10);
+        $employees = Employee::with(['services', 'role'])->paginate(10);
         return view('admin.employees.index', compact('employees'));
     }
 
@@ -26,7 +26,7 @@ class EmployeeController extends Controller
     public function create()
     {
         $services = Service::all();
-        $roles = EmployeeRole::getActiveRoles();
+        $roles = EmployeeRole::orderBy('roleName')->get();
         return view('admin.employees.create', compact('services', 'roles'));
     }
 
@@ -37,7 +37,7 @@ class EmployeeController extends Controller
     {
         $request->validate([
             'employeeName' => 'required|string|max:100',
-            'role' => 'required|string|max:50',
+            'roleID' => 'required|exists:employee_roles,roleID',
             'phoneNumber' => 'required|string|max:20',
             'email' => 'required|email|max:100',
             'info' => 'nullable|string',
@@ -72,7 +72,7 @@ class EmployeeController extends Controller
     {
         $employee = Employee::with('services')->findOrFail($id);
         $services = Service::all();
-        $roles = EmployeeRole::getActiveRoles();
+        $roles = EmployeeRole::orderBy('roleName')->get();
         return view('admin.employees.edit', compact('employee', 'services', 'roles'));
     }
 
@@ -85,7 +85,7 @@ class EmployeeController extends Controller
 
         $request->validate([
             'employeeName' => 'required|string|max:100',
-            'role' => 'required|string|max:50',
+            'roleID' => 'required|exists:employee_roles,roleID',
             'phoneNumber' => 'required|string|max:20',
             'email' => 'required|email|max:100',
             'info' => 'nullable|string',
@@ -146,7 +146,7 @@ class EmployeeController extends Controller
      */
     public function show($id)
     {
-        $employee = Employee::with(['services', 'workSchedules', 'appointments'])->findOrFail($id);
+        $employee = Employee::with(['services', 'role', 'workSchedules', 'appointments'])->findOrFail($id);
         return view('admin.employees.show', compact('employee'));
     }
 }

@@ -33,13 +33,11 @@ class EmployeeRoleController extends Controller
         $request->validate([
             'roleName' => 'required|string|max:100|unique:employee_roles,roleName',
             'description' => 'nullable|string',
-            'is_active' => 'boolean'
         ]);
 
         EmployeeRole::create([
             'roleName' => $request->roleName,
             'description' => $request->description,
-            'is_active' => $request->has('is_active') ? true : false
         ]);
 
         return redirect()->route('admin.roles.index')
@@ -73,13 +71,11 @@ class EmployeeRoleController extends Controller
         $request->validate([
             'roleName' => 'required|string|max:100|unique:employee_roles,roleName,' . $id . ',roleID',
             'description' => 'nullable|string',
-            'is_active' => 'boolean'
         ]);
 
         $role->update([
             'roleName' => $request->roleName,
             'description' => $request->description,
-            'is_active' => $request->has('is_active') ? true : false
         ]);
 
         return redirect()->route('admin.roles.index')

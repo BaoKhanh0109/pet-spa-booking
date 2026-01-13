@@ -1,6 +1,6 @@
 <x-client-layout>
     <div class="py-12 bg-blue-100 min-h-screen">
-        <div class="max-w-3xl mx-auto px-4">
+        <div class="max-w-5xl mx-auto px-4">
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div class="bg-blue-500 p-6 text-center">
                     <h2 class="text-3xl font-bold text-white mb-1">Đặt lịch làm đẹp</h2>
@@ -18,13 +18,14 @@
                             <label class="block font-bold text-gray-800 mb-4 text-lg">
                                 Chọn dịch vụ
                             </label>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 @foreach($services as $service)
                                     <div class="service-item">
                                         <label
                                             class="flex items-start p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition bg-white shadow-sm">
                                             <input type="checkbox" name="service_ids[]" value="{{ $service->serviceID }}"
-                                                class="service-checkbox mt-1 w-5 h-5 text-blue-600 focus:ring-blue-500 rounded border-gray-300">
+                                                class="service-checkbox mt-1 w-5 h-5 text-blue-600 focus:ring-blue-500 rounded border-gray-300"
+                                                {{ isset($selectedServiceID) && $selectedServiceID == $service->serviceID ? 'checked' : '' }}>
                                             <div class="ml-3 flex-1">
                                                 <div class="font-semibold text-gray-800">{{ $service->serviceName }}</div>
                                                 <div class="text-sm text-gray-500">{{ $service->description }}</div>
@@ -91,6 +92,11 @@
             const appointmentDate = document.getElementById('appointmentDate');
             const staffSection = document.getElementById('staffSection');
             const staffList = document.getElementById('staffList');
+
+            // Set minimum datetime to current time
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            appointmentDate.min = now.toISOString().slice(0, 16);
 
             function loadAvailableStaff() {
                 const selectedServices = Array.from(serviceCheckboxes)

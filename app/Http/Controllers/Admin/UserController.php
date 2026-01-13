@@ -13,7 +13,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::withCount(['pets', 'appointments'])
+        $users = User::where('role', 'user')
+            ->withCount(['pets', 'appointments'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
         

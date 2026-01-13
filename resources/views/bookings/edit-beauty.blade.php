@@ -1,6 +1,6 @@
 <x-client-layout>
     <div class="py-12 bg-gray-50 min-h-screen">
-        <div class="max-w-3xl mx-auto px-4">
+        <div class="max-w-5xl mx-auto px-4">
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div class="bg-blue-600 p-6 text-center">
                     <h2 class="text-3xl font-bold text-white mb-1">Đặt lịch làm đẹp</h2>
@@ -18,7 +18,7 @@
                             <label class="block font-bold text-gray-800 mb-4 text-lg">
                                 Chọn dịch vụ
                             </label>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 @foreach($services as $service)
                                     <div class="service-item">
                                         <label
@@ -71,5 +71,14 @@
             </div>
         </div>
     </div>
-    <script> ... </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const appointmentDate = document.getElementById('appointmentDate');
+            
+            // Set minimum datetime to current time
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            appointmentDate.min = now.toISOString().slice(0, 16);
+        });
+    </script>
 </x-client-layout>

@@ -8,7 +8,7 @@
 
             <div class="flex flex-col md:flex-row justify-between items-center mb-8">
                 <div>
-                    <h2 class="text-3xl font-bold text-gray-800">Quản lý người dùng</h2>
+                    <h2 class="text-3xl font-bold text-gray-800">Quản lý Khách Hàng</h2>
                 </div>
             </div>
 
@@ -21,24 +21,7 @@
                             <p class="text-sm text-green-600">{{ session('success') }}</p>
                         </div>
                     </div>
-                    <button onclick="this.parentElement.remove()" class="text-green-400 hover:text-green-600 text-xl font-bold">
-                        &times;
-                    </button>
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r shadow-sm flex items-start justify-between animate-fade-in-down">
-                    <div class="flex items-center gap-3">
-                        <span class="text-2xl">❌</span>
-                        <div>
-                            <p class="font-bold text-red-700">Lỗi!</p>
-                            <p class="text-sm text-red-600">{{ session('error') }}</p>
-                        </div>
-                    </div>
-                    <button onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 text-xl font-bold">
-                        &times;
-                    </button>
+                    <button onclick="this.parentElement.remove()" class="text-green-400 hover:text-green-600 text-xl font-bold">&times;</button>
                 </div>
             @endif
 
@@ -49,7 +32,6 @@
                             <th class="py-4 px-6">ID</th>
                             <th class="py-4 px-6">Thông tin</th>
                             <th class="py-4 px-6">Liên hệ</th>
-                            <th class="py-4 px-6">Vai trò</th>
                             <th class="py-4 px-6">Thống kê</th>
                             <th class="py-4 px-6">Ngày tạo</th>
                             <th class="py-4 px-6 text-right">Hành động</th>
@@ -79,14 +61,6 @@
                                 </td>
 
                                 <td class="py-4 px-6">
-                                    <span class="inline-flex leading-5 font-semibold
-                                        @if($user->role === 'admin') text-red-700
-                                        @else @endif">
-                                        {{ $user->role === 'admin' ? 'Quản trị viên' : 'Khách hàng' }}
-                                    </span>
-                                </td>
-
-                                <td class="py-4 px-6">
                                     <div class="text-sm">
                                         <div class="flex items-center gap-2 mb-1">
                                             <i class="fas fa-paw text-blue-500"></i>
@@ -113,26 +87,23 @@
                                             <i class="fas fa-eye"></i>
                                         </a>
 
-                                        @if($user->role !== 'admin')
-                                            <form action="{{ route('admin.users.destroy', $user->userID) }}" 
-                                                method="POST" 
-                                                onsubmit="return confirm('Bạn có chắc muốn xóa người dùng này? Tất cả thú cưng và lịch hẹn của họ cũng sẽ bị xóa!')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="text-red-500 hover:text-red-600 font-bold transition transform hover:scale-110"
-                                                    title="Xóa">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        @endif
+                                        <form action="{{ route('admin.users.destroy', $user->userID) }}" 
+                                            method="POST" 
+                                            onsubmit="return confirm('Bạn có chắc muốn xóa người dùng này? Tất cả thú cưng và lịch hẹn của họ cũng sẽ bị xóa!')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="text-red-500 hover:text-red-600 font-bold transition transform hover:scale-110"
+                                                title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-8 text-gray-500">
-                                    <i class="fas fa-users text-4xl mb-2"></i>
+                                <td colspan="6" class="text-center py-8 text-gray-500"> <i class="fas fa-users text-4xl mb-2"></i>
                                     <p>Chưa có người dùng nào trong hệ thống.</p>
                                 </td>
                             </tr>

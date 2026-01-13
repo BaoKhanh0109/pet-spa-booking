@@ -122,7 +122,7 @@
 
                                     <!-- Hiển thị giá sau khi chọn -->
                                     <div id="priceResult" class="hidden">
-                                        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border-2 border-blue-200">
+                                        <div class="bg-blue-50 rounded-lg p-6 border-2 border-blue-200">
                                             <div class="flex items-center justify-between mb-3">
                                                 <div>
                                                     <span class="text-sm text-gray-600">Thú cưng:</span>
@@ -144,7 +144,7 @@
                                             </div>
                                         </div>
                                         
-                                        <a href="{{ route('booking.select-category') }}" 
+                                        <a href="#" id="bookNowBtn"
                                             class="mt-4 w-full block text-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition duration-300 shadow-lg transform hover:scale-105">
                                             <i class="fas fa-calendar-check mr-2"></i>Đặt Lịch Ngay
                                         </a>
@@ -178,8 +178,14 @@
     @auth
     @if($pets->count() > 0)
     <script>
-        document.getElementById('petSelector').addEventListener('change', function() {
+        const petSelector = document.getElementById('petSelector');
+        const bookNowBtn = document.getElementById('bookNowBtn');
+        let selectedPetID = null;
+
+        petSelector.addEventListener('change', function() {
             const petID = this.value;
+            selectedPetID = petID;
+            
             if (!petID) {
                 document.getElementById('priceResult').classList.add('hidden');
                 return;
@@ -222,6 +228,29 @@
                 console.error('Error:', error);
                 alert('Có lỗi xảy ra khi tính giá. Vui lòng thử lại!');
             });
+        });
+
+        // Xử lý nút Đặt Lịch Ngay
+        bookNowBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!selectedPetID) {
+                alert('Vui lòng chọn thú cưng trước!');
+                return;
+            }
+            
+            // Chuyển đến trang booking với petID và serviceID
+            const categoryID = {{ $service->categoryID }};
+            let bookingUrl = '';
+            
+            if (categoryID === 1) { // Beauty
+                bookingUrl = '{{ route("booking.beauty") }}?petID=' + selectedPetID + '&serviceID={{ $service->serviceID }}';
+            } else if (categoryID === 2) { // Medical
+                bookingUrl = '{{ route("booking.medical") }}?petID=' + selectedPetID + '&serviceID={{ $service->serviceID }}';
+            } else if (categoryID === 3) { // Pet Care
+                bookingUrl = '{{ route("booking.pet-care") }}?petID=' + selectedPetID;
+            }
+            
+            window.location.href = bookingUrl;
         });
     </script>
     @endif

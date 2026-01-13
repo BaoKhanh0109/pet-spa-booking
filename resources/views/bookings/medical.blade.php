@@ -1,6 +1,6 @@
 <x-client-layout>
     <div class="py-12 bg-gray-100 min-h-screen">
-        <div class="max-w-3xl mx-auto px-4">
+        <div class="max-w-5xl mx-auto px-4">
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div class="bg-blue-500 p-6 text-center">
                     <h2 class="text-3xl font-bold text-white mb-2">Đặt lịch khám bệnh</h2>
@@ -37,7 +37,9 @@
                                         <div class="flex items-start mb-3">
                                             <input type="radio" name="serviceID" value="{{ $service->serviceID }}"
                                                 data-duration="{{ $service->duration }}"
-                                                class="mt-1 w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300 flex-shrink-0" required>
+                                                class="mt-1 w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300 flex-shrink-0" 
+                                                {{ isset($selectedServiceID) && $selectedServiceID == $service->serviceID ? 'checked' : '' }}
+                                                required>
                                             <div class="ml-3 flex-1">
                                                 <div class="font-semibold text-gray-800 group-hover:text-blue-700 leading-tight">
                                                     {{ $service->serviceName }}
@@ -210,6 +212,12 @@
             let currentAppointments = [];
             let selectedEmployeeID = null;
 
+            // Set minimum datetime to current time
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const minDateTime = now.toISOString().slice(0, 16);
+            if (appointmentDate) appointmentDate.min = minDateTime;
+            
             const today = new Date().toISOString().split('T')[0];
             if (selectDate) selectDate.min = today;
 

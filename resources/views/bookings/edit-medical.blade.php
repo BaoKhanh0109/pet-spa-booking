@@ -1,6 +1,6 @@
 <x-client-layout>
     <div class="py-12 bg-blue-100 min-h-screen">
-        <div class="max-w-3xl mx-auto px-4">
+        <div class="max-w-5xl mx-auto px-4">
             <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
                 <div class="bg-blue-500 p-6 text-center">
                     <h2 class="text-3xl font-bold text-white mb-2">Chỉnh sửa lịch khám bệnh</h2>
@@ -165,6 +165,13 @@
             const doctorSection = document.getElementById('doctorSection');
             const appointmentDate = document.getElementById('appointmentDate');
             const appointmentDateDoctor = document.getElementById('appointmentDateDoctor');
+
+            // Set minimum datetime to current time
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const minDateTime = now.toISOString().slice(0, 16);
+            if (appointmentDate) appointmentDate.min = minDateTime;
+            if (appointmentDateDoctor) appointmentDateDoctor.min = minDateTime;
 
             bookingMethods.forEach(method => {
                 method.addEventListener('change', function() {

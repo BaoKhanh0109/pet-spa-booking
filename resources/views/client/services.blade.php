@@ -30,8 +30,8 @@
             @if($services->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                     @foreach($services as $sv)
-                        <div
-                            class="group bg-white rounded-2xl shadow-sm hover:shadow-2xl transition duration-300 border border-gray-100 overflow-hidden flex flex-col h-full hover:-translate-y-1">
+                        <a href="{{ route('services.show', $sv->serviceID) }}"
+                            class="group bg-white rounded-2xl shadow-sm hover:shadow-2xl transition duration-300 border border-gray-100 overflow-hidden flex flex-col h-full hover:-translate-y-1 cursor-pointer">
 
                             <div class="h-56 overflow-hidden relative bg-gray-100">
                                 <img src="{{ $sv->serviceImage ? asset('storage/' . $sv->serviceImage) : 'https://picsum.photos/seed/' . $sv->serviceID . '/600/400' }}"
@@ -58,14 +58,13 @@
                                         <span class="text-xs text-gray-400">Xem chi tiết để biết giá</span>
                                     </div>
 
-                                    <a href="{{ route('services.show', $sv->serviceID) }}"
-                                        class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition duration-300 shadow-lg transform active:scale-95 whitespace-nowrap">
+                                    <div class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl group-hover:bg-blue-700 transition duration-300 shadow-lg transform group-hover:scale-105 whitespace-nowrap">
                                         Xem Chi Tiết
-                                    </a>
+                                    </div>
                                 </div>
 
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
             @else

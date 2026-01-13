@@ -11,19 +11,19 @@
                     @if(Auth::user()->role == 'admin')
                         <x-nav-link :href="route('admin.appointments.index')"
                             :active="request()->routeIs('admin.appointments.*')">
-                            {{ __('Quản Trị') }}
+                            {{ __('Quản lý lịch hẹn') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.services.index')" :active="request()->routeIs('admin.services.*')">
-                            {{ __('Quản lý Dịch Vụ') }}
+                            {{ __('Quản lý dịch vụ') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.employees.index')" :active="request()->routeIs('admin.employees.*')">
-                            {{ __('Quản lý Nhân viên') }}
+                            {{ __('Quản lý nhân viên') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.roles.index')" :active="request()->routeIs('admin.roles.*')">
-                            {{ __('Quản lý Chức vụ') }}
+                            {{ __('Quản lý chức vụ') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                            {{ __('Quản lý User') }}
+                            {{ __('Quản lý người dùng') }}
                         </x-nav-link>
                     @endif
                 </div>

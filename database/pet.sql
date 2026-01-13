@@ -13,7 +13,6 @@ CREATE TABLE services (
     serviceID INT PRIMARY KEY AUTO_INCREMENT,
     serviceName VARCHAR(100) NOT NULL,
     description TEXT,
-    price DECIMAL(10, 2) NOT NULL,
     categoryID INT NOT NULL,
     duration INT NOT NULL DEFAULT 60 COMMENT 'Thời gian thực hiện (phút)',
     serviceImage VARCHAR(255),

@@ -8,7 +8,6 @@
 
             <div class="mb-8">
                 <h2 class="text-3xl font-bold text-gray-800">Thông tin cá nhân</h2>
-                <p class="text-gray-600 mt-1">Quản lý thông tin tài khoản và bảo mật của bạn</p>
             </div>
 
             @if(session('success'))
@@ -52,7 +51,7 @@
                         @csrf
                         @method('PATCH')
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                             <div>
                                 <label class="block text-gray-700 font-bold mb-2">
                                     Họ và tên <span class="text-red-500">*</span>
@@ -68,15 +67,10 @@
                                 </label>
                                 <input type="email" name="email" value="{{ old('email', $user->email) }}"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition p-3"
-                                    required>
-                                @if($user->email_verified_at)
-                                    <p class="text-xs text-green-600 mt-1">✓ Email đã xác thực</p>
-                                @else
-                                    <p class="text-xs text-yellow-600 mt-1">⚠ Email chưa xác thực</p>
-                                @endif
+                                    required>   
                             </div>
 
-                            <div>
+                            <div class="md:col-span-1">
                                 <label class="block text-gray-700 font-bold mb-2">
                                     Số điện thoại
                                 </label>
@@ -85,23 +79,14 @@
                                     placeholder="VD: 0912345678">
                             </div>
 
-                            <div>
+                            <div class="lg:col-span-2">
                                 <label class="block text-gray-700 font-bold mb-2">
-                                    Vai trò
+                                    Địa chỉ
                                 </label>
-                                <input type="text" value="{{ $user->role === 'admin' ? 'Quản trị viên' : 'Khách hàng' }}"
-                                    class="w-full bg-gray-100 border-gray-300 rounded-lg p-3 text-gray-600"
-                                    disabled>
+                                <input type="text" name="address" value="{{ old('address', $user->address) }}"
+                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition p-3"
+                                    placeholder="Nhập địa chỉ của bạn">
                             </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <label class="block text-gray-700 font-bold mb-2">
-                                Địa chỉ
-                            </label>
-                            <textarea name="address" rows="2"
-                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition p-3"
-                                placeholder="Nhập địa chỉ của bạn">{{ old('address', $user->address) }}</textarea>
                         </div>
 
                         <div class="flex justify-end">
@@ -186,23 +171,16 @@
                         </div>
 
                         <div class="flex items-start">
-                            <div class="w-40 text-gray-500 font-semibold">ID tài khoản:</div>
-                            <div class="flex-1 text-gray-800 font-mono">
-                                #{{ $user->userID }}
-                            </div>
-                        </div>
-
-                        <div class="flex items-start">
                             <div class="w-40 text-gray-500 font-semibold">Số thú cưng:</div>
                             <div class="flex-1 text-blue-600 font-bold">
-                                {{ $user->pets->count() }} con
+                                {{ $user->pets->count() }}
                             </div>
                         </div>
 
                         <div class="flex items-start">
                             <div class="w-40 text-gray-500 font-semibold">Số lịch hẹn:</div>
                             <div class="flex-1 text-green-600 font-bold">
-                                {{ $user->appointments->count() }} lần
+                                {{ $user->appointments->count() }}  
                             </div>
                         </div>
                     </div>

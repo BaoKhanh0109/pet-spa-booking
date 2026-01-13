@@ -35,6 +35,7 @@ class BookingController extends Controller
     // Bước 2a: Hiển thị form đặt lịch làm đẹp
     public function createBeauty(Request $request) {
         $petID = $request->get('petID');
+        $selectedServiceID = $request->get('serviceID'); // Nhận serviceID từ query string
         $pet = Pet::where('petID', $petID)->first();
         $services = $this->getServicesByCategoryID(1); // 1 = Làm đẹp
         
@@ -45,12 +46,13 @@ class BookingController extends Controller
             $service->adjustedPrice = PricingHelper::calculatePriceBySize($service->price, $petSize);
         }
         
-        return view('bookings.beauty', compact('services', 'pet'));
+        return view('bookings.beauty', compact('services', 'pet', 'selectedServiceID'));
     }
 
     // Bước 2b: Hiển thị form đặt lịch y tế
     public function createMedical(Request $request) {
         $petID = $request->get('petID');
+        $selectedServiceID = $request->get('serviceID'); // Nhận serviceID từ query string
         $pet = Pet::where('petID', $petID)->first();
         $services = $this->getServicesByCategoryID(2); // 2 = Y tế
         
@@ -65,7 +67,7 @@ class BookingController extends Controller
             $q->where('categoryID', 2); // 2 = Y tế
         })->get();
         
-        return view('bookings.medical', compact('services', 'pet', 'doctors'));
+        return view('bookings.medical', compact('services', 'pet', 'doctors', 'selectedServiceID'));
     }
 
     // Bước 2c: Hiển thị form đặt lịch trông giữ
@@ -81,7 +83,6 @@ class BookingController extends Controller
         
         return view('bookings.pet-care', compact('service', 'pet'));
     }
-
     // API: Lấy nhân viên rảnh theo dịch vụ và ngày giờ
     public function getAvailableStaff(Request $request) {
         $serviceIds = $request->get('service_ids', []);

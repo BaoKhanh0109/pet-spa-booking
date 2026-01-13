@@ -60,6 +60,11 @@
                                 </td>
                                 <td class="py-4 px-6 font-semibold text-gray-800">
                                     {{ \Carbon\Carbon::parse($app->appointmentDate)->format('d/m/Y H:i') }}
+                                    @if($app->service_categories == 3 && $app->endDate)
+                                        <div class="text-xs text-orange-600 mt-1">
+                                            <i class="fas fa-calendar-check mr-1"></i>Đón: {{ \Carbon\Carbon::parse($app->endDate)->format('d/m/Y') }}
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="py-4 px-6">
                                     <span class="font-bold text-gray-800">{{ $app->user->name ?? 'Khách vãng lai' }}</span>
@@ -172,9 +177,8 @@
     <div id="petDetailModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <!-- Header -->
-            <div class="bg-gray-800 p-6 flex justify-between items-center sticky top-0 z-10">
+            <div class="bg-blue-500 p-6 flex justify-between items-center sticky top-0 z-10">
                 <h3 class="text-2xl font-bold text-white flex items-center gap-2">
-                    <i class="fas fa-paw"></i>
                     Chi Tiết Thú Cưng
                 </h3>
                 <button onclick="closePetDetailModal()" class="text-white hover:text-gray-300 text-2xl">

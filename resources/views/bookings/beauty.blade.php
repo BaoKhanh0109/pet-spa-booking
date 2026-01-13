@@ -169,7 +169,7 @@
                                     });
                                 }, 100);
                             } else {
-                                staffList.innerHTML = '<div class="col-span-2 text-center text-gray-600 p-4">⚠️ Không có nhân viên rảnh vào thời gian này.<br><small>Hệ thống sẽ tự động sắp xếp lịch phù hợp.</small></div>';
+                                staffList.innerHTML = '<div class="col-span-2 text-center text-amber-600 p-4">⚠️ Không có nhân viên rảnh vào thời gian này.<br><small>Vui lòng chọn thời gian trong giờ làm việc (09:00 - 17:00, Thứ 2 - Thứ 7).<br>Hoặc để hệ thống tự động sắp xếp lịch phù hợp.</small></div>';
                                 staffSection.style.display = 'block';
                             }
                         })

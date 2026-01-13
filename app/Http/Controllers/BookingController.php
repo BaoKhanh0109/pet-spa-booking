@@ -88,20 +88,32 @@ class BookingController extends Controller
         $serviceIds = $request->get('service_ids', []);
         $appointmentDate = $request->get('appointment_date');
         $dayOfWeek = date('l', strtotime($appointmentDate));
+        $appointmentTime = date('H:i:s', strtotime($appointmentDate));
         
         // Tính tổng thời gian cần cho các dịch vụ
         $totalDuration = Service::whereIn('serviceID', $serviceIds)->sum('duration');
+        $appointmentEndTime = date('H:i:s', strtotime($appointmentDate) + ($totalDuration * 60));
         
         // Tìm nhân viên có thể làm các dịch vụ này
-        $availableStaff = Employee::whereHas('services', function($q) use ($serviceIds) {
+        $availableStaff = Employee::with('role')
+        ->whereHas('services', function($q) use ($serviceIds) {
             $q->whereIn('services.serviceID', $serviceIds);
         })
-        ->whereHas('workSchedules', function($q) use ($dayOfWeek) {
-            $q->where('work_schedules.dayOfWeek', $dayOfWeek);
+        ->whereHas('workSchedules', function($q) use ($dayOfWeek, $appointmentTime, $appointmentEndTime) {
+            $q->where('work_schedules.dayOfWeek', $dayOfWeek)
+              ->where('work_schedules.startTime', '<=', $appointmentTime)
+              ->where('work_schedules.endTime', '>=', $appointmentEndTime);
         })
         ->get()
         ->filter(function($employee) use ($appointmentDate, $totalDuration) {
             return !$this->hasTimeConflict($employee->employeeID, $appointmentDate, $totalDuration);
+        })
+        ->map(function($employee) {
+            return [
+                'employeeID' => $employee->employeeID,
+                'employeeName' => $employee->employeeName,
+                'role' => $employee->role ? $employee->role->roleName : 'Nhân viên'
+            ];
         })
         ->values();
         
@@ -309,15 +321,19 @@ class BookingController extends Controller
     // Hàm tự động chọn nhân viên rảnh
     private function autoAssignStaff($serviceIds, $appointmentDate) {
         $dayOfWeek = date('l', strtotime($appointmentDate));
+        $appointmentTime = date('H:i:s', strtotime($appointmentDate));
         
         // Tính tổng thời gian cần cho các dịch vụ
         $totalDuration = Service::whereIn('serviceID', $serviceIds)->sum('duration');
+        $appointmentEndTime = date('H:i:s', strtotime($appointmentDate) + ($totalDuration * 60));
         
         $employees = Employee::whereHas('services', function($q) use ($serviceIds) {
             $q->whereIn('services.serviceID', $serviceIds);
         })
-        ->whereHas('workSchedules', function($q) use ($dayOfWeek) {
-            $q->where('work_schedules.dayOfWeek', $dayOfWeek);
+        ->whereHas('workSchedules', function($q) use ($dayOfWeek, $appointmentTime, $appointmentEndTime) {
+            $q->where('work_schedules.dayOfWeek', $dayOfWeek)
+              ->where('work_schedules.startTime', '<=', $appointmentTime)
+              ->where('work_schedules.endTime', '>=', $appointmentEndTime);
         })
         ->get();
         
@@ -430,15 +446,19 @@ class BookingController extends Controller
     // Hàm tự động chọn bác sĩ rảnh
     private function autoAssignDoctor($serviceID, $appointmentDate) {
         $dayOfWeek = date('l', strtotime($appointmentDate));
+        $appointmentTime = date('H:i:s', strtotime($appointmentDate));
         
         $service = Service::find($serviceID);
         $duration = $service ? $service->duration : 0;
+        $appointmentEndTime = date('H:i:s', strtotime($appointmentDate) + ($duration * 60));
         
         $doctors = Employee::whereHas('services', function($q) use ($serviceID) {
             $q->where('services.serviceID', $serviceID);
         })
-        ->whereHas('workSchedules', function($q) use ($dayOfWeek) {
-            $q->where('work_schedules.dayOfWeek', $dayOfWeek);
+        ->whereHas('workSchedules', function($q) use ($dayOfWeek, $appointmentTime, $appointmentEndTime) {
+            $q->where('work_schedules.dayOfWeek', $dayOfWeek)
+              ->where('work_schedules.startTime', '<=', $appointmentTime)
+              ->where('work_schedules.endTime', '>=', $appointmentEndTime);
         })
         ->get();
         
@@ -515,7 +535,7 @@ class BookingController extends Controller
                 $service->adjustedPrice = PricingHelper::calculatePriceBySize($service->price, $petSize);
             }
             
-            return view('bookings.edit-beauty', compact('appointment', 'services', 'pets'));
+            return view('bookings.edit-beauty', compact('appointment', 'services', 'pet', 'pets'));
         } elseif ($appointment->service_categories == 2) { // 2 = Y tế
             $services = $this->getServicesByCategoryID(2);
             
@@ -529,7 +549,7 @@ class BookingController extends Controller
             $doctors = Employee::with('role')->whereHas('services', function($q) {
                 $q->where('categoryID', 2);
             })->get();
-            return view('bookings.edit-medical', compact('appointment', 'services', 'doctors', 'pets'));
+            return view('bookings.edit-medical', compact('appointment', 'services', 'doctors', 'pet', 'pets'));
         } else { // 3 = Trông giữ
             $service = Service::with('category')->where('categoryID', 3)->first();
             
@@ -538,7 +558,7 @@ class BookingController extends Controller
             $service->petSize = $petSize;
             $service->adjustedPrice = PricingHelper::calculatePriceBySize($service->price, $petSize);
             
-            return view('bookings.edit-pet-care', compact('appointment', 'service', 'pets'));
+            return view('bookings.edit-pet-care', compact('appointment', 'service', 'pet', 'pets'));
         }
     }
 

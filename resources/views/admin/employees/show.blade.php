@@ -39,10 +39,10 @@
                                 <p class="text-sm text-gray-500 mt-1">ID: {{ $employee->employeeID }}</p>
                                 <span
                                     class="inline-block mt-2 px-3 py-1 text-sm font-semibold rounded-full
-                                    @if (Str::contains($employee->role, 'Bác sĩ')) bg-blue-100 text-blue-800
-                                    @elseif(Str::contains($employee->role, 'Grooming')) bg-purple-100 text-purple-800
+                                    @if ($employee->role && Str::contains($employee->role->roleName, 'Bác sĩ')) bg-blue-100 text-blue-800
+                                    @elseif($employee->role && Str::contains($employee->role->roleName, 'Grooming')) bg-purple-100 text-purple-800
                                     @else bg-green-100 text-green-800 @endif">
-                                    {{ $employee->role }}
+                                    {{ $employee->role ? $employee->role->roleName : 'Chưa có chức vụ' }}
                                 </span>
                             </div>
 

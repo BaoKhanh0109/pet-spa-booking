@@ -43,7 +43,7 @@ class GoogleAuthController extends Controller
                 $user->email = $googleUser->getEmail();
                 $user->google_id = $googleUser->getId();
                 $user->password = Hash::make(Str::random(24));
-                $user->role = 'customer';
+                $user->role = 'user';
                 $user->phone = ''; // Required field, set empty for Google users
                 $user->address = ''; // Set empty address
                 $user->save();

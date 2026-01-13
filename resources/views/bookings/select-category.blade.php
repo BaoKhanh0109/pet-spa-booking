@@ -29,28 +29,19 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             @foreach($categories as $category)
                                 @php
-                                    // Map categoryID sang route name
                                     $routeMap = [
                                         1 => 'booking.beauty',
                                         2 => 'booking.medical',
                                         3 => 'booking.pet-care'
                                     ];
                                     $routeName = $routeMap[$category->categoryID] ?? null;
-                                    
-                                    // Màu sắc cho từng category
-                                    $colorMap = [
-                                        1 => 'blue',
-                                        2 => 'green',
-                                        3 => 'purple'
-                                    ];
-                                    $color = $colorMap[$category->categoryID] ?? 'gray';
                                 @endphp
                                 
                                 @if($routeName)
                                     <div class="service-card group cursor-pointer" data-route="{{ $routeName }}">
-                                        <div class="border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-{{ $color }}-500 transition-all duration-300 bg-white h-full">
+                                        <div class="border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-blue-500 transition-all duration-300 bg-white hover:bg-blue-50 h-full">
                                             <div class="text-center">
-                                                <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-{{ $color }}-600">
+                                                <h3 class="text-xl font-bold mb-2">
                                                     {{ $category->categoryName }}
                                                 </h3>
                                                 <p class="text-gray-500 text-sm">
@@ -59,7 +50,7 @@
                                                 
                                                 @if($category->capacity)
                                                     <div class="mt-3">
-                                                        <span class="inline-block bg-{{ $color }}-100 text-{{ $color }}-700 text-xs px-3 py-1 rounded-full font-semibold">
+                                                        <span class="inline-block bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-semibold">
                                                             Sức chứa: {{ $category->capacity }} chỗ
                                                         </span>
                                                     </div>

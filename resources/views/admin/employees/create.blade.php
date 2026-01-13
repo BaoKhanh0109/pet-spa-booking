@@ -29,15 +29,15 @@
 
                             <!-- Chức vụ -->
                             <div>
-                                <label for="role" class="block font-medium text-sm text-gray-700">
+                                <label for="roleID" class="block font-medium text-sm text-gray-700">
                                     Chức vụ <span class="text-red-500">*</span>
                                 </label>
-                                <select name="role" id="role"
+                                <select name="roleID" id="roleID"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     required>
                                     <option value="">-- Chọn chức vụ --</option>
                                     @foreach($roles as $role)
-                                        <option value="{{ $role->roleName }}" {{ old('role') == $role->roleName ? 'selected' : '' }}>
+                                        <option value="{{ $role->roleID }}" {{ old('roleID') == $role->roleID ? 'selected' : '' }}>
                                             {{ $role->roleName }}
                                         </option>
                                     @endforeach
@@ -47,7 +47,7 @@
                                         <i class="fas fa-cog"></i> Quản lý chức vụ
                                     </a>
                                 </p>
-                                @error('role')
+                                @error('roleID')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>

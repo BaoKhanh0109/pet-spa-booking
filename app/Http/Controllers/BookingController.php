@@ -8,6 +8,7 @@ use App\Models\Pet;
 use App\Models\Appointment;
 use App\Models\Employee;
 use App\Models\WorkSchedule;
+use App\Helpers\PricingHelper;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -37,6 +38,13 @@ class BookingController extends Controller
         $pet = Pet::where('petID', $petID)->first();
         $services = $this->getServicesByCategoryID(1); // 1 = Làm đẹp
         
+        // Tính size và giá điều chỉnh cho từng dịch vụ
+        $petSize = PricingHelper::getPetSize($pet->weight, $pet->backLength);
+        foreach($services as $service) {
+            $service->petSize = $petSize;
+            $service->adjustedPrice = PricingHelper::calculatePriceBySize($service->price, $petSize);
+        }
+        
         return view('bookings.beauty', compact('services', 'pet'));
     }
 
@@ -45,7 +53,15 @@ class BookingController extends Controller
         $petID = $request->get('petID');
         $pet = Pet::where('petID', $petID)->first();
         $services = $this->getServicesByCategoryID(2); // 2 = Y tế
-        $doctors = Employee::whereHas('services', function($q) {
+        
+        // Tính size và giá điều chỉnh cho từng dịch vụ
+        $petSize = PricingHelper::getPetSize($pet->weight, $pet->backLength);
+        foreach($services as $service) {
+            $service->petSize = $petSize;
+            $service->adjustedPrice = PricingHelper::calculatePriceBySize($service->price, $petSize);
+        }
+        
+        $doctors = Employee::with('role')->whereHas('services', function($q) {
             $q->where('categoryID', 2); // 2 = Y tế
         })->get();
         
@@ -56,7 +72,12 @@ class BookingController extends Controller
     public function createPetCare(Request $request) {
         $petID = $request->get('petID');
         $pet = Pet::where('petID', $petID)->first();
-        $service = Service::with('category')->where('categoryID', 3)->first(); // 3 = Trông giữ
+        $service = Service::with('category')->where('categoryID', 3)->first(); // 3 = Trông giữ - lấy dịch vụ đầu tiên (1 ngày)
+        
+        // Tính size và giá điều chỉnh
+        $petSize = PricingHelper::getPetSize($pet->weight, $pet->backLength);
+        $service->petSize = $petSize;
+        $service->adjustedPrice = PricingHelper::calculatePriceBySize($service->price, $petSize);
         
         return view('bookings.pet-care', compact('service', 'pet'));
     }
@@ -480,19 +501,42 @@ class BookingController extends Controller
         }
 
         $pets = Pet::where('userID', Auth::user()->userID)->get();
+        $pet = $appointment->pet;
 
         // Dùng service_categories thay vì booking_type
         if ($appointment->service_categories == 1) { // 1 = Làm đẹp
             $services = $this->getServicesByCategoryID(1);
+            
+            // Tính size và giá điều chỉnh cho từng dịch vụ
+            $petSize = PricingHelper::getPetSize($pet->weight, $pet->backLength);
+            foreach($services as $service) {
+                $service->petSize = $petSize;
+                $service->adjustedPrice = PricingHelper::calculatePriceBySize($service->price, $petSize);
+            }
+            
             return view('bookings.edit-beauty', compact('appointment', 'services', 'pets'));
         } elseif ($appointment->service_categories == 2) { // 2 = Y tế
             $services = $this->getServicesByCategoryID(2);
-            $doctors = Employee::whereHas('services', function($q) {
+            
+            // Tính size và giá điều chỉnh cho từng dịch vụ
+            $petSize = PricingHelper::getPetSize($pet->weight, $pet->backLength);
+            foreach($services as $service) {
+                $service->petSize = $petSize;
+                $service->adjustedPrice = PricingHelper::calculatePriceBySize($service->price, $petSize);
+            }
+            
+            $doctors = Employee::with('role')->whereHas('services', function($q) {
                 $q->where('categoryID', 2);
             })->get();
             return view('bookings.edit-medical', compact('appointment', 'services', 'doctors', 'pets'));
         } else { // 3 = Trông giữ
             $service = Service::with('category')->where('categoryID', 3)->first();
+            
+            // Tính size và giá điều chỉnh
+            $petSize = PricingHelper::getPetSize($pet->weight, $pet->backLength);
+            $service->petSize = $petSize;
+            $service->adjustedPrice = PricingHelper::calculatePriceBySize($service->price, $petSize);
+            
             return view('bookings.edit-pet-care', compact('appointment', 'service', 'pets'));
         }
     }

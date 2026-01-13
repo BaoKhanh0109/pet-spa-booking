@@ -29,7 +29,10 @@
                                                 <div class="font-semibold text-gray-800">{{ $service->serviceName }}</div>
                                                 <div class="text-sm text-gray-500">{{ $service->description }}</div>
                                                 <div class="text-blue-700 font-bold mt-2">
-                                                    {{ number_format($service->price) }}đ
+                                                    {{ number_format($service->adjustedPrice) }}đ
+                                                    <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2">
+                                                        Size {{ $service->petSize }}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </label>

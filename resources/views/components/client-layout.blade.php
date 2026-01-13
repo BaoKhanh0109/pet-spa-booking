@@ -86,6 +86,9 @@
                             <div class="absolute right-0 top-full pt-2 w-48 hidden group-hover:block z-50">
 
                                 <div class="bg-white rounded-md shadow-lg py-1 border border-gray-100">
+                                    <a href="{{ route('profile.edit') }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-semibold">Thông tin cá nhân</a>
+                                    
                                     @if(Auth::user()->role == 'admin')
                                         <a href="{{ route('admin.appointments.index') }}"
                                             class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 font-bold">Vào trang

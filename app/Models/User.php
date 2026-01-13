@@ -51,4 +51,17 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Relationships
+     */
+    public function pets()
+    {
+        return $this->hasMany(Pet::class, 'userID', 'userID');
+    }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'userID', 'userID');
+    }
 }

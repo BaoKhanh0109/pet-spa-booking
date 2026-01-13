@@ -8,7 +8,7 @@
                 </div>
 
                 <div class="p-8">
-                    @if(session('error'))
+                    @if(session(key: 'error'))
                         <div class="mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r" role="alert">
                             <p class="font-bold">Lỗi</p>
                             <p>{{ session('error') }}</p>
@@ -30,22 +30,30 @@
                             <label class="block font-bold text-gray-800 mb-4 text-lg">
                                 Chọn dịch vụ y tế
                             </label>
-                            <div class="space-y-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 @foreach($services as $service)
                                     <label
-                                        class="flex items-start p-4 border rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition bg-white shadow-sm group">
-                                        <input type="radio" name="serviceID" value="{{ $service->serviceID }}"
-                                            data-duration="{{ $service->duration }}"
-                                            class="mt-1 w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300" required>
-                                        <div class="ml-3 flex-1">
-                                            <div class="font-semibold text-gray-800 group-hover:text-blue-700">
-                                                {{ $service->serviceName }}
+                                        class="flex flex-col p-4 border rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition bg-white shadow-sm group h-full">
+                                        <div class="flex items-start mb-3">
+                                            <input type="radio" name="serviceID" value="{{ $service->serviceID }}"
+                                                data-duration="{{ $service->duration }}"
+                                                class="mt-1 w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300 flex-shrink-0" required>
+                                            <div class="ml-3 flex-1">
+                                                <div class="font-semibold text-gray-800 group-hover:text-blue-700 leading-tight">
+                                                    {{ $service->serviceName }}
+                                                </div>
                                             </div>
-                                            <div class="text-sm text-gray-500">{{ $service->description }}</div>
-                                            <div class="text-blue-600 font-bold mt-2">
-                                                {{ number_format($service->price) }}đ <span
-                                                    class="text-gray-400 font-normal mx-2">|</span> {{ $service->duration }}
-                                                phút
+                                        </div>
+                                        <div class="text-sm text-gray-500 mb-3 flex-1">{{ $service->description }}</div>
+                                        <div class="mt-auto">
+                                            <div class="text-blue-600 font-bold text-lg">
+                                                {{ number_format($service->adjustedPrice) }}đ
+                                            </div>
+                                            <div class="flex items-center gap-2 mt-2 flex-wrap">
+                                                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-medium">
+                                                    Size {{ $service->petSize }}
+                                                </span>
+                                                <span class="text-xs text-gray-500">{{ $service->duration }} phút</span>
                                             </div>
                                         </div>
                                     </label>
@@ -103,7 +111,7 @@
                                             class="doctor-radio w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300">
                                         <div class="ml-3 flex-1">
                                             <div class="font-semibold text-gray-800">{{ $doctor->employeeName }}</div>
-                                            <div class="text-sm text-gray-500">{{ $doctor->role }}</div>
+                                            <div class="text-sm text-gray-500">{{ $doctor->role->roleName ?? 'Bác sĩ' }}</div>
                                             @if($doctor->email)
                                                 <div class="text-xs text-gray-400 mt-1">{{ $doctor->email }}</div>
                                             @endif
@@ -274,7 +282,20 @@
             if (selectDate) {
                 selectDate.addEventListener('change', function () {
                     const selectedDate = new Date(this.value);
-                    const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
+                    const dayOfWeekEn = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
+                    
+                    // Chuyển tên ngày từ tiếng Anh sang tiếng Việt
+                    const dayMap = {
+                        'Monday': 'Thứ Hai',
+                        'Tuesday': 'Thứ Ba',
+                        'Wednesday': 'Thứ Tư',
+                        'Thursday': 'Thứ Năm',
+                        'Friday': 'Thứ Sáu',
+                        'Saturday': 'Thứ Bảy',
+                        'Sunday': 'Chủ Nhật'
+                    };
+                    const dayOfWeek = dayMap[dayOfWeekEn];
+                    
                     const schedule = currentDoctorSchedules.find(s => s.dayOfWeek === dayOfWeek);
 
                     if (!schedule) {
@@ -296,38 +317,38 @@
                         const button = document.createElement('button');
                         button.type = 'button';
 
-                        // Sửa style nút bấm: Xanh dương thay vì xanh lá
+                        // Sửa style nút bấm: Xanh dương thay vì xanh lá, và đồng nhất kích thước
                         if (isUnavailable) {
-                            button.className = 'p-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200';
+                            button.className = 'p-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 h-14 flex flex-col items-center justify-center';
                             button.disabled = true;
                             if (isBooked) {
-                                button.innerHTML = `<span class="block">${slot.time}</span><span class="text-xs">Đã đặt</span>`;
+                                button.innerHTML = `<span class="block font-semibold">${slot.time}</span><span class="text-xs">Đã đặt</span>`;
                             } else {
-                                button.innerHTML = `<span class="block">${slot.time}</span><span class="text-xs">Qua giờ</span>`;
+                                button.innerHTML = `<span class="block font-semibold">${slot.time}</span><span class="text-xs">Qua giờ</span>`;
                             }
                         } else {
-                            button.className = 'p-2 rounded-lg text-sm font-bold bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition cursor-pointer';
+                            button.className = 'p-3 rounded-lg text-sm font-bold bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition cursor-pointer h-14 flex items-center justify-center';
                             button.textContent = slot.time;
 
                             button.addEventListener('click', function () {
                                 availableTimeSlots.querySelectorAll('button:not([disabled])').forEach(btn => {
-                                    btn.className = 'p-2 rounded-lg text-sm font-bold bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition cursor-pointer';
+                                    btn.className = 'p-3 rounded-lg text-sm font-bold bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition cursor-pointer h-14 flex items-center justify-center';
                                 });
 
                                 // Active state: Blue-600
-                                this.className = 'p-2 rounded-lg text-sm font-bold bg-blue-600 border border-blue-600 text-white shadow-md cursor-pointer';
+                                this.className = 'p-3 rounded-lg text-sm font-bold bg-blue-600 border border-blue-600 text-white shadow-md cursor-pointer h-14 flex items-center justify-center';
 
                                 appointmentDateDoctor.value = slot.datetime;
 
                                 const selectedDate = new Date(slot.datetime);
-                                const displayText = selectedDate.toLocaleString('vi-VN', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                });
+                                // Format thủ công để tránh chữ "lúc"
+                                const weekday = selectedDate.toLocaleDateString('vi-VN', { weekday: 'long' });
+                                const day = selectedDate.getDate();
+                                const month = selectedDate.getMonth() + 1;
+                                const year = selectedDate.getFullYear();
+                                const hours = String(selectedDate.getHours()).padStart(2, '0');
+                                const minutes = String(selectedDate.getMinutes()).padStart(2, '0');
+                                const displayText = `${hours}:${minutes} ${weekday}, ${day} tháng ${month}, ${year}`;
                                 selectedTimeText.textContent = displayText;
                                 selectedTimeDisplay.classList.remove('hidden');
                             });

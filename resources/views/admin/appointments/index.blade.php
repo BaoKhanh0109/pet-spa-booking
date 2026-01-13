@@ -88,7 +88,7 @@
                                     @if($app->employee)
                                         <span class="font-semibold text-gray-800">{{ $app->employee->employeeName }}</span>
                                         <br>
-                                        <span class="text-xs text-gray-500">{{ $app->employee->role ?? 'Nhân viên' }}</span>
+                                        <span class="text-xs text-gray-500">{{ $app->employee->role ? $app->employee->role->roleName : 'Nhân viên' }}</span>
                                     @else
                                         <span class="text-gray-400 italic">Chưa phân công</span>
                                     @endif

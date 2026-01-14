@@ -50,7 +50,6 @@ class PetController extends Controller
     public function update(Request $request, $id) {
         $pet = Pet::find($id);
 
-        // Bảo mật
         if (!$pet || $pet->userID != Auth::user()->userID) {
             abort(403);
         }
@@ -75,7 +74,6 @@ class PetController extends Controller
             abort(403);
         }
 
-        // Kiểm tra xem thú cưng có lịch hẹn nào không
         $appointmentCount = $pet->appointments()->count();
         
         if ($appointmentCount > 0) {

@@ -4,7 +4,6 @@
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div class="bg-blue-500 p-6 text-center">
                     <h2 class="text-3xl font-bold text-white mb-2">Đặt lịch trông giữ</h2>
-                    <p class="text-blue-100">Dịch vụ lưu trú</p>
                 </div>
 
                 <div class="p-8">

@@ -69,7 +69,6 @@
                         <tr>
                             <th class="py-4 px-6">Tên chức vụ</th>
                             <th class="py-4 px-6">Mô tả</th>
-                            <th class="py-4 px-6">Trạng thái</th>
                             <th class="py-4 px-6">Số nhân viên</th>
                             <th class="py-4 px-6 text-right">Hành động</th>
                         </tr>
@@ -85,19 +84,7 @@
                                 <td class="py-4 px-6 text-sm max-w-xs">
                                     {{ $role->description ?? 'Không có mô tả' }}
                                 </td>
-
-                                <td class="py-4 px-6">
-                                    @if($role->is_active)
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-700">
-                                            Đang hoạt động
-                                        </span>
-                                    @else
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-700">
-                                            Không hoạt động
-                                        </span>
-                                    @endif
-                                </td>
-
+                                
                                 <td class="py-4 px-6">
                                     <span class="text-blue-600 font-bold">
                                         {{ $role->employees->count() }} người

@@ -1,1 +1,0 @@
-mysql -u root -p < database/pet.sql

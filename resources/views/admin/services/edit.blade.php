@@ -14,13 +14,6 @@
             -moz-appearance: textfield;
         }
     </style>
-
-    <x-slot name="header">
-        <h2 class="font-bold text-2xl text-gray-800 leading-tight" style="font-family: 'Nunito', sans-serif;">
-            {{ __('Quản Lý Dịch Vụ') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12 bg-gray-50 min-h-screen" style="font-family: 'Nunito', sans-serif;">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             
@@ -57,17 +50,20 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div class="col-span-1">
                                 <label class="block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wider">
-                                    Tên dịch vụ
+                                    Tên dịch vụ <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="serviceName" 
                                        value="{{ old('serviceName', $service->serviceName) }}"
                                        class="w-full bg-gray-50 text-gray-900 border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-sm font-medium" 
                                        required>
+                                @error('serviceName')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <div class="col-span-1">
                                 <label class="block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wider">
-                                    Giá tiền (VNĐ)
+                                    Giá tiền (VNĐ) <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative">
                                     <input type="number" name="price" 
@@ -76,7 +72,30 @@
                                            required>
                                     <span class="absolute right-4 top-3 text-gray-400 font-bold">đ</span>
                                 </div>
+                                @error('price')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wider">
+                                Thể loại dịch vụ <span class="text-red-500">*</span>
+                            </label>
+                            <select name="categoryID"
+                                class="w-full bg-gray-50 text-gray-900 border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-sm font-medium"
+                                required>
+                                <option value="">-- Chọn thể loại --</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->categoryID }}" 
+                                        {{ old('categoryID', $service->categoryID) == $category->categoryID ? 'selected' : '' }}>
+                                        {{ $category->categoryName }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('categoryID')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100">

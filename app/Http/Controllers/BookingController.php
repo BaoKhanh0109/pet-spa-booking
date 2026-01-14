@@ -14,30 +14,26 @@ use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
-    // Helper method để lấy services theo category ID
     private function getServicesByCategoryID($categoryID) {
         return Service::where('categoryID', $categoryID)->get();
     }
     
-    // Helper method để lấy 1 service theo category ID
     private function getServiceByCategoryID($categoryID) {
         return Service::where('categoryID', $categoryID)->first();
     }
     
-    // Bước 1: Chọn loại dịch vụ (beauty, medical, pet_care)
     public function selectCategory() {
         $pets = Pet::where('userID', Auth::user()->userID)->get();
-        $categories = \App\Models\ServiceCategory::all(); // Lấy tất cả danh mục
+        $categories = \App\Models\ServiceCategory::all();
         
         return view('bookings.select-category', compact('pets', 'categories'));
     }
 
-    // Bước 2a: Hiển thị form đặt lịch làm đẹp
     public function createBeauty(Request $request) {
         $petID = $request->get('petID');
-        $selectedServiceID = $request->get('serviceID'); // Nhận serviceID từ query string
+        $selectedServiceID = $request->get('serviceID');
         $pet = Pet::where('petID', $petID)->first();
-        $services = $this->getServicesByCategoryID(1); // 1 = Làm đẹp
+        $services = $this->getServicesByCategoryID(1);
         
         // Tính size và giá điều chỉnh cho từng dịch vụ
         $petSize = PricingHelper::getPetSize($pet->weight, $pet->backLength);
@@ -56,7 +52,7 @@ class BookingController extends Controller
         $pet = Pet::where('petID', $petID)->first();
         $services = $this->getServicesByCategoryID(2); // 2 = Y tế
         
-        // Tính size và giá điều chỉnh cho từng dịch vụ
+
         $petSize = PricingHelper::getPetSize($pet->weight, $pet->backLength);
         foreach($services as $service) {
             $service->petSize = $petSize;
@@ -64,37 +60,33 @@ class BookingController extends Controller
         }
         
         $doctors = Employee::with('role')->whereHas('services', function($q) {
-            $q->where('categoryID', 2); // 2 = Y tế
+            $q->where('categoryID', 2);
         })->get();
         
         return view('bookings.medical', compact('services', 'pet', 'doctors', 'selectedServiceID'));
     }
 
-    // Bước 2c: Hiển thị form đặt lịch trông giữ
     public function createPetCare(Request $request) {
         $petID = $request->get('petID');
         $pet = Pet::where('petID', $petID)->first();
-        $service = Service::with('category')->where('categoryID', 3)->first(); // 3 = Trông giữ - lấy dịch vụ đầu tiên (1 ngày)
+        $service = Service::with('category')->where('categoryID', 3)->first();
         
-        // Tính size và giá điều chỉnh
         $petSize = PricingHelper::getPetSize($pet->weight, $pet->backLength);
         $service->petSize = $petSize;
         $service->adjustedPrice = PricingHelper::calculatePriceBySize($service->price, $petSize);
         
         return view('bookings.pet-care', compact('service', 'pet'));
     }
-    // API: Lấy nhân viên rảnh theo dịch vụ và ngày giờ
+
     public function getAvailableStaff(Request $request) {
         $serviceIds = $request->get('service_ids', []);
         $appointmentDate = $request->get('appointment_date');
         $dayOfWeek = date('l', strtotime($appointmentDate));
         $appointmentTime = date('H:i:s', strtotime($appointmentDate));
         
-        // Tính tổng thời gian cần cho các dịch vụ
         $totalDuration = Service::whereIn('serviceID', $serviceIds)->sum('duration');
         $appointmentEndTime = date('H:i:s', strtotime($appointmentDate) + ($totalDuration * 60));
         
-        // Tìm nhân viên có thể làm các dịch vụ này
         $availableStaff = Employee::with('role')
         ->whereHas('services', function($q) use ($serviceIds) {
             $q->whereIn('services.serviceID', $serviceIds);
@@ -120,7 +112,6 @@ class BookingController extends Controller
         return response()->json($availableStaff);
     }
 
-    // API: Lấy lịch rảnh của bác sĩ
     public function getDoctorSchedule(Request $request) {
         try {
             $employeeID = $request->get('employee_id');
@@ -128,14 +119,12 @@ class BookingController extends Controller
             
             $schedules = WorkSchedule::where('employeeID', $employeeID)->get();
             
-            // Lấy appointments trong khoảng 3 tháng (tháng trước, tháng hiện tại, tháng sau)
-            // để đảm bảo có đủ dữ liệu khi user chọn ngày
             $startDate = date('Y-m-01', strtotime($month . '-01 -1 month'));
             $endDate = date('Y-m-t', strtotime($month . '-01 +1 month'));
             
             $appointments = Appointment::where('employeeID', $employeeID)
                 ->whereBetween('appointmentDate', [$startDate, $endDate])
-                ->with('service:serviceID,serviceName,duration')
+                ->with('services:serviceID,serviceName,duration')
                 ->get();
             
             return response()->json([
@@ -151,7 +140,6 @@ class BookingController extends Controller
         }
     }
 
-    // Lưu đặt lịch làm đẹp (có thể chọn nhiều dịch vụ)
     public function storeBeauty(Request $request) {
         $request->validate([
             'petID' => 'required',
@@ -160,16 +148,13 @@ class BookingController extends Controller
             'employeeID' => 'nullable|exists:employees,employeeID'
         ]);
 
-        // Tính tổng thời gian dịch vụ
         $totalDuration = Service::whereIn('serviceID', $request->service_ids)->sum('duration');
 
-        // Kiểm tra xung đột thời gian cho thú cưng
         if ($this->hasPetTimeConflict($request->petID, $request->appointmentDate, $totalDuration)) {
             return redirect()->back()->withInput()
                 ->with('error', 'Thú cưng đã có lịch hẹn vào thời gian này. Vui lòng chọn thời gian khác!');
         }
 
-        // Nếu không chọn nhân viên, hệ thống tự động chọn
         $employeeID = $request->employeeID;
         if (!$employeeID) {
             $employeeID = $this->autoAssignStaff($request->service_ids, $request->appointmentDate);
@@ -178,14 +163,13 @@ class BookingController extends Controller
                 return redirect()->back()->withInput()->with('error', 'Không có nhân viên rảnh vào thời gian này. Vui lòng chọn thời gian khác!');
             }
         } else {
-            // Nếu có chọn nhân viên, kiểm tra xung đột thời gian
             if ($this->hasTimeConflict($employeeID, $request->appointmentDate, $totalDuration)) {
                 return redirect()->back()->withInput()->with('error', 'Nhân viên đã có lịch hẹn vào thời gian này. Vui lòng chọn giờ khác!');
             }
         }
 
         $appointment = Appointment::create([
-            'service_categories' => 1, // 1 = Làm đẹp
+            'service_categories' => 1,
             'userID' => Auth::user()->userID,
             'petID' => $request->petID,
             'employeeID' => $employeeID,
@@ -194,7 +178,6 @@ class BookingController extends Controller
             'status' => 'Pending'
         ]);
 
-        // Lưu các dịch vụ được chọn vào appointment_services
         $appointment->services()->attach($request->service_ids);
 
         return redirect()->route('booking.history')->with('success', 'Đặt lịch làm đẹp thành công!');

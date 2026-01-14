@@ -3,12 +3,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-    <x-slot name="header">
-        <h2 class="font-bold text-2xl text-gray-800 leading-tight" style="font-family: 'Nunito', sans-serif;">
-            {{ __('Quản lý dịch vụ') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12 bg-gray-50 min-h-screen" style="font-family: 'Nunito', sans-serif;">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -34,24 +28,49 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div class="col-span-1">
                                 <label class="block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wider">
-                                    Tên dịch vụ
+                                    Tên dịch vụ <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" name="serviceName"
+                                <input type="text" name="serviceName" value="{{ old('serviceName') }}"
                                     class="w-full bg-gray-50 text-gray-900 border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-sm font-medium placeholder-gray-400"
                                     placeholder="VD: Spa Cao Cấp..." required>
+                                @error('serviceName')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <div class="col-span-1">
                                 <label class="block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wider">
-                                    Giá tiền (VNĐ)
+                                    Giá tiền (VNĐ) <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative">
-                                    <input type="number" name="price"
+                                    <input type="number" name="price" value="{{ old('price') }}"
                                         class="w-full bg-gray-50 text-gray-900 border border-gray-200 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-sm font-medium placeholder-gray-400"
                                         placeholder="VD: 500000" required>
                                     <span class="absolute right-4 top-3 text-gray-400 font-bold">đ</span>
                                 </div>
+                                @error('price')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wider">
+                                Thể loại dịch vụ <span class="text-red-500">*</span>
+                            </label>
+                            <select name="categoryID"
+                                class="w-full bg-gray-50 text-gray-900 border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-sm font-medium"
+                                required>
+                                <option value="">-- Chọn thể loại --</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->categoryID }}" {{ old('categoryID') == $category->categoryID ? 'selected' : '' }}>
+                                        {{ $category->categoryName }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('categoryID')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="mb-6">

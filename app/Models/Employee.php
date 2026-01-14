@@ -24,7 +24,6 @@ class Employee extends Model
         'info',
     ];
 
-    // Relationship: Employee thuộc về một role
     public function role()
     {
         return $this->belongsTo(EmployeeRole::class, 'roleID', 'roleID');

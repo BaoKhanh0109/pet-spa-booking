@@ -6,9 +6,6 @@
             <h2 class="mt-4 text-3xl font-extrabold text-gray-900">
                 Tạo tài khoản mới
             </h2>
-            <p class="mt-2 text-sm text-gray-600">
-                Điền đầy đủ thông tin để chúng tôi liên hệ dễ dàng hơn.
-            </p>
         </div>
 
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -28,7 +25,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Địa chỉ Email</label>
                         <div class="mt-1">
-                            <input name="email" type="email" required class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition" placeholder="email@vidu.com" value="{{ old('email') }}">
+                            <input name="email" type="email" required class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition" value="{{ old('email') }}">
                             <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-500 text-sm" />
                         </div>
                     </div>
@@ -36,7 +33,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Số điện thoại</label>
                         <div class="mt-1">
-                            <input name="phone" type="text" required class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition" placeholder="0912..." value="{{ old('phone') }}">
+                            <input name="phone" type="text" required class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition" value="{{ old('phone') }}">
                             <x-input-error :messages="$errors->get('phone')" class="mt-2 text-red-500 text-sm" />
                         </div>
                     </div>
@@ -52,7 +49,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Mật khẩu</label>
                         <div class="mt-1">
-                            <input name="password" type="password" required class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition" placeholder="••••••••">
+                            <input name="password" type="password" required class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition">
                             <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-500 text-sm" />
                         </div>
                     </div>
@@ -60,7 +57,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Nhập lại Mật khẩu</label>
                         <div class="mt-1">
-                            <input name="password_confirmation" type="password" required class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition" placeholder="••••••••">
+                            <input name="password_confirmation" type="password" required class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition">
                         </div>
                     </div>
 

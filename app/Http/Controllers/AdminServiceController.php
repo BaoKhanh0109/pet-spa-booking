@@ -8,32 +8,24 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminServiceController extends Controller
 {
-    /**
-     * Danh sách dịch vụ
-     */
     public function index()
     {
         $services = Service::all();
         return view('admin.services.index', compact('services'));
     }
 
-    /**
-     * Form thêm dịch vụ
-     */
     public function create()
     {
-
-        return view('admin.services.create'); 
+        $categories = \App\Models\ServiceCategory::all();
+        return view('admin.services.create', compact('categories')); 
     }
 
-    /**
-     * Lưu dịch vụ mới (có ảnh)
-     */
     public function store(Request $request)
     {
         $request->validate([
             'serviceName'   => 'required|string|max:100', 
             'price'         => 'required|numeric',
+            'categoryID'    => 'required|exists:service_categories,categoryID',
             'description'   => 'nullable|string',
             'serviceImage'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
@@ -41,10 +33,10 @@ class AdminServiceController extends Controller
         $data = $request->only([
             'serviceName',
             'price',
+            'categoryID',
             'description',
         ]);
 
-        // Upload ảnh
         if ($request->hasFile('serviceImage')) {
             $data['serviceImage'] = $request->file('serviceImage')
                                             ->store('services', 'public');
@@ -56,23 +48,19 @@ class AdminServiceController extends Controller
             ->with('success', 'Thêm dịch vụ thành công!');
     }
 
-    /**
-     * Form sửa dịch vụ
-     */
     public function edit($id)
     {
         $service = Service::findOrFail($id);
-        return view('admin.services.edit', compact('service'));
+        $categories = \App\Models\ServiceCategory::all();
+        return view('admin.services.edit', compact('service', 'categories'));
     }
 
-    /**
-     * Cập nhật dịch vụ (đổi ảnh nếu có)
-     */
     public function update(Request $request, $id)
     {
         $request->validate([
             'serviceName'   => 'required|string|max:100',
             'price'         => 'required|numeric',
+            'categoryID'    => 'required|exists:service_categories,categoryID',
             'description'   => 'nullable|string',
             'serviceImage'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
@@ -82,17 +70,15 @@ class AdminServiceController extends Controller
         $data = $request->only([
             'serviceName',
             'price',
+            'categoryID',
             'description',
         ]);
 
-        // Nếu upload ảnh mới → xóa ảnh cũ
         if ($request->hasFile('serviceImage')) {
-            // Kiểm tra và xóa ảnh cũ
             if ($service->serviceImage && Storage::disk('public')->exists($service->serviceImage)) {
                 Storage::disk('public')->delete($service->serviceImage);
             }
 
-            // Lưu ảnh mới
             $data['serviceImage'] = $request->file('serviceImage')
                                             ->store('services', 'public');
         }

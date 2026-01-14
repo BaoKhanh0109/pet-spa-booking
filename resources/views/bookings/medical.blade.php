@@ -290,20 +290,10 @@
             if (selectDate) {
                 selectDate.addEventListener('change', function () {
                     const selectedDate = new Date(this.value);
-                    const dayOfWeekEn = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
+                    // Lấy tên ngày bằng tiếng Anh để so sánh với database
+                    const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
                     
-                    // Chuyển tên ngày từ tiếng Anh sang tiếng Việt
-                    const dayMap = {
-                        'Monday': 'Thứ Hai',
-                        'Tuesday': 'Thứ Ba',
-                        'Wednesday': 'Thứ Tư',
-                        'Thursday': 'Thứ Năm',
-                        'Friday': 'Thứ Sáu',
-                        'Saturday': 'Thứ Bảy',
-                        'Sunday': 'Chủ Nhật'
-                    };
-                    const dayOfWeek = dayMap[dayOfWeekEn];
-                    
+                    // Tìm lịch làm việc của bác sĩ cho ngày được chọn
                     const schedule = currentDoctorSchedules.find(s => s.dayOfWeek === dayOfWeek);
 
                     if (!schedule) {

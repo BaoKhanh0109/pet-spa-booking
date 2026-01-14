@@ -22,14 +22,17 @@
                                 @foreach($services as $service)
                                     <div class="service-item">
                                         <label
-                                            class="flex items-start p-4 border rounded-xl cursor-pointer hover:border-pink-500 hover:bg-pink-50 transition bg-white shadow-sm">
+                                            class="flex items-start p-4 border rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition bg-white shadow-sm">
                                             <input type="checkbox" name="service_ids[]" value="{{ $service->serviceID }}"
-                                                class="service-checkbox mt-1 w-5 h-5 text-pink-600 focus:ring-pink-500 rounded border-gray-300">
+                                                class="service-checkbox mt-1 w-5 h-5 text-blue-600 focus:ring-blue-500 rounded border-gray-300">
                                             <div class="ml-3 flex-1">
                                                 <div class="font-semibold text-gray-800">{{ $service->serviceName }}</div>
                                                 <div class="text-sm text-gray-500">{{ $service->description }}</div>
-                                                <div class="text-pink-600 font-bold mt-2">
-                                                    {{ number_format($service->price) }}đ
+                                                <div class="text-blue-700 font-bold mt-2">
+                                                    {{ number_format($service->adjustedPrice) }}đ
+                                                    <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2">
+                                                        Size {{ $service->petSize }}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </label>

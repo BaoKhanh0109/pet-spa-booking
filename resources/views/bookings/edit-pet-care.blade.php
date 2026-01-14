@@ -10,7 +10,7 @@
                 <div class="p-8">
                     @if(session('error'))
                         <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert">
-                            <p class="font-bold">⚠️ Lỗi</p>
+                            <p class="font-bold">Lỗi</p>
                             <p>{{ session('error') }}</p>
                         </div>
                     @endif
@@ -42,9 +42,12 @@
                                     <p class="text-gray-600 mb-3">{{ $service->description }}</p>
                                     <div class="flex items-center justify-between">
                                         <span
-                                            class="text-orange-600 font-bold text-xl">{{ number_format($service->price) }}đ/ngày</span>
+                                            class="text-blue-700 font-bold text-xl">{{ number_format($service->adjustedPrice) }}đ/ngày</span>
+                                    <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2">
+                                        Size {{ $service->petSize }}
+                                    </span>
                                         <span
-                                            class="bg-orange-200 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                            class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
                                             Dịch vụ trông giữ 24/7
                                         </span>
                                     </div>
@@ -120,7 +123,7 @@
             const summary = document.getElementById('summary');
             const totalDays = document.getElementById('totalDays');
             const totalPrice = document.getElementById('totalPrice');
-            const pricePerDay = {{ $service->price }};
+            const pricePerDay = {{ $service->adjustedPrice }};
 
             const today = new Date().toISOString().split('T')[0];
             startDate.min = today;

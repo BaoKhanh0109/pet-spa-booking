@@ -28,48 +28,5 @@
         </div>
     </div>
 
-  <section class="py-16 bg-white">
-  <div class="container mx-auto px-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-      
-      <div class="relative">
-        <img 
-          src="asset('storage/' . $pets->hinh.jpg)}}" 
-          alt="Bác sĩ thú y đang khám bệnh" 
-          class="w-full h-auto rounded-2xl shadow-lg object-cover"
-        >
-        <div class="absolute -bottom-6 -right-6 bg-blue-100 w-24 h-24 rounded-full -z-10"></div>
-        <div class="absolute -top-6 -left-6 bg-yellow-100 w-24 h-24 rounded-full -z-10"></div>
-      </div>
-
-      <div>
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
-          Chăm sóc thú cưng của bạn như người thân
-        </h2>
-        <p class="text-gray-600 mb-8 leading-relaxed">
-          Chúng tôi hiểu rằng thú cưng là thành viên trong gia đình. Với trang thiết bị hiện đại và tình yêu thương động vật vô bờ bến, chúng tôi cam kết mang lại dịch vụ y tế tốt nhất.
-        </p>
-    </div>
-  </div>
-</section>
-
-    <div class="py-16 bg-white">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <h2 class="text-3xl font-bold text-gray-900 mb-12">Tại sao chọn PetCare?</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="p-6 bg-gray-50 rounded-xl">
-                    <h3 class="text-xl font-bold mb-2">Bác sĩ Chuyên nghiệp</h3>
-                    <p class="text-gray-600">Đội ngũ bác sĩ thú y được đào tạo bài bản, tận tâm.</p>
-                </div>
-                <div class="p-6 bg-gray-50 rounded-xl">
-                    <h3 class="text-xl font-bold mb-2">Spa Sang chảnh</h3>
-                    <p class="text-gray-600">Sử dụng các sản phẩm cao cấp, an toàn cho da thú cưng.</p>
-                </div>
-                <div class="p-6 bg-gray-50 rounded-xl">
-                    <h3 class="text-xl font-bold mb-2">Đặt lịch Nhanh chóng</h3>
-                    <p class="text-gray-600">Hệ thống đặt lịch online tiện lợi, không cần chờ đợi.</p>
-                </div>
-            </div>
-        </div>
-    </div>
+ 
 </x-client-layout>

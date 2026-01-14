@@ -81,7 +81,6 @@ CREATE TABLE pets (
 );
 CREATE TABLE appointments (
     appointmentID INT PRIMARY KEY AUTO_INCREMENT,
-    service_categories INT NOT NULL,
     userID INT NOT NULL,
     petID INT NOT NULL,
     employeeID INT,
@@ -93,8 +92,7 @@ CREATE TABLE appointments (
     status VARCHAR(50) DEFAULT 'Pending',
     prefer_doctor TINYINT(1) DEFAULT 0,
     FOREIGN KEY (userID) REFERENCES users(userID),
-    FOREIGN KEY (employeeID) REFERENCES employees(employeeID),
-    FOREIGN KEY (service_categories) REFERENCES service_categories(categoryID)
+    FOREIGN KEY (employeeID) REFERENCES employees(employeeID)
 );
 
 
@@ -195,20 +193,20 @@ INSERT INTO pets (userID, petName, species, breed, weight, backLength, age, medi
 (3, 'Lu', 'Chó', 'Golden', 25.0, 50, 4, 'Sức khỏe tốt', 'lu.jpg');
 
 -- 8. Thêm Lịch hẹn (Appointments)
--- CẤU TRÚC MỚI: service_categories (1=Làm đẹp, 2=Y tế, 3=Trông giữ), xóa serviceID và booking_type
-INSERT INTO appointments (service_categories, userID, petID, employeeID, appointmentDate, endDate, note, status, prefer_doctor) VALUES
+-- Loại dịch vụ sẽ lấy thông qua: appointments -> appointment_services -> services -> service_categories
+INSERT INTO appointments (userID, petID, employeeID, appointmentDate, endDate, note, status, prefer_doctor) VALUES
 -- Lịch 1: Y tế - Khám bệnh (Completed)
-(2, 2, 1, 1, '2025-12-20 09:00:00', NULL, 'Bé bỏ ăn 2 ngày', 'Completed', 1),
+(2, 1, 1, '2025-12-20 09:00:00', NULL, 'Bé bỏ ăn 2 ngày', 'Completed', 1),
 -- Lịch 2: Làm đẹp - Spa + Cắt tỉa (Completed)
-(1, 3, 3, 3, '2025-12-21 14:00:00', NULL, 'Cắt móng kỹ giúp em', 'Completed', 0),
+(3, 3, 3, '2025-12-21 14:00:00', NULL, 'Cắt móng kỹ giúp em', 'Completed', 0),
 -- Lịch 3: Y tế - Tiêm vaccine (Pending)
-(2, 2, 2, 2, '2025-12-28 10:00:00', NULL, 'Tiêm mũi nhắc lại', 'Pending', 0),
+(2, 2, 2, '2025-12-28 10:00:00', NULL, 'Tiêm mũi nhắc lại', 'Pending', 0),
 -- Lịch 4: Trông giữ - Pet Care (Pending)
-(3, 2, 1, 4, '2025-12-31 08:00:00', '2026-01-03 18:00:00', 'Đi du lịch Tết, nhờ chăm sóc', 'Pending', 0),
+(2, 1, 4, '2025-12-31 08:00:00', '2026-01-03 18:00:00', 'Đi du lịch Tết, nhờ chăm sóc', 'Pending', 0),
 -- Lịch 5: Làm đẹp - Spa đơn (Pending)
-(1, 3, 3, 3, '2025-12-30 15:00:00', NULL, 'Spa thư giãn cuối năm', 'Pending', 0),
+(3, 3, 3, '2025-12-30 15:00:00', NULL, 'Spa thư giãn cuối năm', 'Pending', 0),
 -- Lịch 6: Y tế - Khám tổng quát (Completed)
-(2, 3, 3, 1, '2025-12-18 10:30:00', NULL, 'Kiểm tra định kỳ', 'Completed', 1);
+(3, 3, 1, '2025-12-18 10:30:00', NULL, 'Kiểm tra định kỳ', 'Completed', 1);
 
 -- 9. Thêm Chi tiết dịch vụ trong lịch hẹn (Appointment Services)
 -- Làm đẹp và Y tế dùng bảng này để lưu services đã chọn

@@ -50,6 +50,13 @@ class Appointment extends Model
     // 5. Lịch hẹn có nhiều dịch vụ cụ thể (thông qua appointment_services)
     public function services()
     {
-        return $this->belongsToMany(Service::class, 'appointment_services', 'appointmentID', 'serviceID');
+        return $this->belongsToMany(Service::class, 'appointment_services', 'appointmentID', 'serviceID')
+            ->withPivot('appointment_servicesId');
+    }
+
+    // Helper method để lấy tất cả categories từ services
+    public function getServiceCategories()
+    {
+        return $this->services()->with('category')->get()->pluck('category')->unique('categoryID');
     }
 }

@@ -4,7 +4,6 @@
             <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
                 <div class="bg-blue-500 p-6 text-center">
                     <h2 class="text-3xl font-bold text-white mb-2">Chỉnh sửa lịch trông giữ</h2>
-                    <p class="text-blue-100">Gửi {{ $appointment->pet->petName }} an tâm</p>
                 </div>
 
                 <div class="p-8">
@@ -77,7 +76,7 @@
                             <p class="text-sm text-gray-600 mt-2">Ngày bạn đón thú cưng về</p>
                         </div>
 
-                        <div id="summary" class="mb-6 bg-amber-50 rounded-xl p-5" style="display: none;">
+                        <div id="summary" class="mb-6 bg-blue-50 rounded-xl p-5" style="display: none;">
                             <h4 class="font-bold text-gray-700 mb-3 flex items-center">
                                 Tổng quan đặt chỗ
                             </h4>
@@ -86,9 +85,9 @@
                                     <span>Số ngày trông giữ:</span>
                                     <span id="totalDays" class="font-bold">0 ngày</span>
                                 </div>
-                                <div class="flex justify-between text-lg border-t-2 border-orange-200 pt-2 mt-2">
+                                <div class="flex justify-between text-lg border-t-2 border-blue-200 pt-2 mt-2">
                                     <span class="font-bold">Tổng tiền dự kiến:</span>
-                                    <span id="totalPrice" class="font-bold text-orange-600">0đ</span>
+                                    <span id="totalPrice" class="font-bold text-blue-600">0đ</span>
                                 </div>
                             </div>
                         </div>

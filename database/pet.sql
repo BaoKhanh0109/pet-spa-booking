@@ -132,12 +132,11 @@ INSERT INTO services (serviceName, description, price, categoryID, duration) VAL
 ('Trông giữ thú cưng (Ngày)', 'Giữ thú cưng 24h bao gồm ăn uống', 150000, 3, 1440);
 
 -- 3. Thêm Nhân viên (Employees)
-INSERT INTO employees (employeeName, role, phoneNumber, email) VALUES
-('Bs. Nguyễn Văn An', 'Bác sĩ thú y', '0901111111', 'bs.an@petcare.com'),
-('Bs. Lê Thị Lan', 'Bác sĩ thú y', '0902222222', 'bs.lan@petcare.com'),
-('Trần Văn Hùng', 'Chuyên viên Grooming', '0903333333', 'hung.groomer@petcare.com'),
-('Phạm Thị Mai', 'Nhân viên chăm sóc', '0904444444', 'mai.care@petcare.com');
-
+INSERT INTO employees (employeeName, roleID, phoneNumber, email) VALUES
+('Bs. Nguyễn Văn An', 1, '0901111111', 'bs.an@petcare.com'),
+('Bs. Lê Thị Lan', 1, '0902222222', 'bs.lan@petcare.com'),
+('Trần Văn Hùng', 2, '0903333333', 'hung.groomer@petcare.com'),
+('Phạm Thị Mai', 3, '0904444444', 'mai.care@petcare.com');
 -- 4. Thêm Phân công dịch vụ cho nhân viên (employee_service) - MỚI
 -- Bác sĩ An làm được Khám (1) và Tiêm (2)
 INSERT INTO employee_service (employeeID, serviceID) VALUES 

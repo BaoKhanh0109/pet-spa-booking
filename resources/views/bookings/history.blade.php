@@ -15,22 +15,23 @@
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-lg rounded-xl border border-gray-200">
-                <table class="min-w-full text-left">
-                    <thead class="bg-blue-50 text-blue-700 uppercase font-bold text-sm">
-                        <tr>
-                            <th class="py-4 px-6">Loại</th>
-                            <th class="py-4 px-6">Thú Cưng</th>
-                            <th class="py-4 px-6">Dịch Vụ</th>
-                            <th class="py-4 px-6">Nhân viên</th>
-                            <th class="py-4 px-6">Thời Gian</th>
-                            <th class="py-4 px-6 text-center">Trạng Thái</th>
-                            <th class="py-4 px-6">Ghi chú</th>
-                            <th class="py-4 px-6 text-center">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-gray-600 divide-y divide-gray-100">
-                        @foreach($appointments as $app)
+            @if($appointments->count() > 0)
+                <div class="bg-white overflow-hidden shadow-lg rounded-xl border border-gray-200">
+                    <table class="min-w-full text-left">
+                        <thead class="bg-blue-50 text-blue-700 uppercase font-bold text-sm">
+                            <tr>
+                                <th class="py-4 px-6">Loại</th>
+                                <th class="py-4 px-6">Thú Cưng</th>
+                                <th class="py-4 px-6">Dịch Vụ</th>
+                                <th class="py-4 px-6">Nhân viên</th>
+                                <th class="py-4 px-6">Thời Gian</th>
+                                <th class="py-4 px-6 text-center">Trạng Thái</th>
+                                <th class="py-4 px-6">Ghi chú</th>
+                                <th class="py-4 px-6 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-600 divide-y divide-gray-100">
+                            @foreach($appointments as $app)
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="py-4 px-6 text-gray-800">
                                     {{ $app->serviceCategory->categoryName ?? 'N/A' }}
@@ -98,6 +99,29 @@
                     </tbody>
                 </table>
             </div>
+            @else
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
+                    <div class="mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Chưa có lịch hẹn nào</h3>
+                    <p class="text-gray-500 mb-8 max-w-md mx-auto">
+                        Bạn chưa đặt lịch hẹn nào. Hãy đặt lịch ngay để thú cưng của bạn được chăm sóc tốt nhất!
+                    </p>
+                    <div class="flex items-center justify-center gap-4">
+                        <a href="{{ route('booking.select-category') }}"
+                            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:-translate-y-0.5 transition duration-200">
+                            Đặt lịch ngay
+                        </a>
+                        <a href="{{ route('client.services') }}"
+                            class="inline-flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-bold py-3 px-6 rounded-lg border border-gray-300 shadow-sm transition duration-200">
+                            Xem dịch vụ
+                        </a>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </x-client-layout>

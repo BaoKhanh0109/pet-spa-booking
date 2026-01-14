@@ -10,7 +10,7 @@
 
             <form action="{{ route('client.services') }}" method="GET" class="max-w-xl mx-auto relative group">
                 <input type="text" name="search" value="{{ request('search') }}"
-                    placeholder="Bạn đang tìm dịch vụ gì? (VD: Cắt tỉa...)"
+                    placeholder="Bạn đang tìm dịch vụ gì?"
                     class="w-full pl-6 pr-14 py-4 rounded-full border border-gray-200 shadow-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 outline-none transition">
                 <button type="submit"
                     class="absolute right-2 top-2 bg-blue-600 text-white p-2.5 rounded-full hover:bg-blue-700 transition shadow-lg transform group-hover:scale-105">

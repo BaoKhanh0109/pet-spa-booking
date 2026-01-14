@@ -49,60 +49,6 @@
                             {{ $service->description ?? 'Dịch vụ chất lượng cao, thực hiện bởi chuyên viên giàu kinh nghiệm.' }}
                         </p>
 
-                        <!-- Bảng giá theo size -->
-                        <!--<div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6">
-                            <h3 class="text-xl font-bold text-gray-800 mb-4">
-                                <i class="fas fa-dollar-sign text-blue-600 mr-2"></i>Bảng giá theo kích cỡ
-                            </h3>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                <div class="bg-white rounded-lg p-3 text-center border-2 border-gray-200 hover:border-blue-400 transition">
-                                    <div class="text-sm text-gray-600 font-semibold mb-1">Size XS</div>
-                                    <div class="text-xs text-gray-500 mb-2">≤ 3kg / ≤ 20cm</div>
-                                    <div class="text-base font-bold text-gray-800">
-                                        {{ number_format($prices['XS'], 0, ',', '.') }}đ
-                                    </div>
-                                </div>
-                                <div class="bg-white rounded-lg p-3 text-center border-2 border-gray-200 hover:border-blue-400 transition">
-                                    <div class="text-sm text-gray-600 font-semibold mb-1">Size S</div>
-                                    <div class="text-xs text-gray-500 mb-2">3-10kg / 20-30cm</div>
-                                    <div class="text-base font-bold text-gray-800">
-                                        {{ number_format($prices['S'], 0, ',', '.') }}đ
-                                    </div>
-                                </div>
-                                <div class="bg-white rounded-lg p-3 text-center border-2 border-gray-200 hover:border-blue-400 transition">
-                                    <div class="text-sm text-gray-600 font-semibold mb-1">Size M</div>
-                                    <div class="text-xs text-gray-500 mb-2">10-20kg / 30-40cm</div>
-                                    <div class="text-base font-bold text-gray-800">
-                                        {{ number_format($prices['M'], 0, ',', '.') }}đ
-                                    </div>
-                                </div>
-                                <div class="bg-white rounded-lg p-3 text-center border-2 border-gray-200 hover:border-blue-400 transition">
-                                    <div class="text-sm text-gray-600 font-semibold mb-1">Size L</div>
-                                    <div class="text-xs text-gray-500 mb-2">20-30kg / 40-50cm</div>
-                                    <div class="text-base font-bold text-gray-800">
-                                        {{ number_format($prices['L'], 0, ',', '.') }}đ
-                                    </div>
-                                </div>
-                                <div class="bg-white rounded-lg p-3 text-center border-2 border-gray-200 hover:border-blue-400 transition">
-                                    <div class="text-sm text-gray-600 font-semibold mb-1">Size XL</div>
-                                    <div class="text-xs text-gray-500 mb-2">30-40kg / 50-60cm</div>
-                                    <div class="text-base font-bold text-gray-800">
-                                        {{ number_format($prices['XL'], 0, ',', '.') }}đ
-                                    </div>
-                                </div>
-                                <div class="bg-white rounded-lg p-3 text-center border-2 border-gray-200 hover:border-blue-400 transition">
-                                    <div class="text-sm text-gray-600 font-semibold mb-1">Size XXL</div>
-                                    <div class="text-xs text-gray-500 mb-2">> 40kg / > 60cm</div>
-                                    <div class="text-base font-bold text-gray-800">
-                                        {{ number_format($prices['XXL'], 0, ',', '.') }}đ
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-4 text-center italic">
-                                * Size được xác định dựa trên cân nặng và chiều dài lưng của thú cưng
-                            </p>
-                        </div>-->
-
                         @auth
                             <!-- Chọn thú cưng để xem giá chính xác -->
                             <div class="bg-white rounded-xl border-2 border-blue-100 p-6">
@@ -153,7 +99,7 @@
                                     <div class="text-center py-6">
                                         <p class="text-gray-600 mb-4">Bạn chưa có thú cưng nào trong hệ thống</p>
                                         <a href="{{ route('pets.create') }}" 
-                                            class="inline-block px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition">
+                                            class="inline-block px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">
                                             <i class="fas fa-plus mr-2"></i>Thêm Thú Cưng
                                         </a>
                                     </div>

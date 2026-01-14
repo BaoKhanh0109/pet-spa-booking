@@ -65,12 +65,12 @@
 
                         <div class="flex items-start">
                             <div class="w-32 text-gray-500 font-semibold">Số thú cưng:</div>
-                            <div class="flex-1 text-blue-600 font-bold">{{ $user->pets->count() }} con</div>
+                            <div class="flex-1 text-blue-600 font-bold">{{ $user->pets->count() }}</div>
                         </div>
 
                         <div class="flex items-start">
                             <div class="w-32 text-gray-500 font-semibold">Số lịch hẹn:</div>
-                            <div class="flex-1 text-green-600 font-bold">{{ $user->appointments->count() }} lần</div>
+                            <div class="flex-1 text-green-600 font-bold">{{ $user->appointments->count() }}</div>
                         </div>
                     </div>
                 </div>
@@ -153,7 +153,7 @@
                                         </td>
 
                                         <td class="py-3 px-4">
-                                            {{ $appointment->serviceCategory ? $appointment->serviceCategory->categoryName : 'N/A' }}
+                                            {{ $appointment->service_category ? $appointment->service_category->categoryName : 'N/A' }}
                                         </td>
 
                                         <td class="py-3 px-4">

@@ -91,14 +91,47 @@
                         </div>
 
                         <div id="dateSection" class="mb-8">
-                            <label class="block font-bold text-gray-800 mb-3 text-lg">
-                                Chọn ngày và giờ khám
-                            </label>
-                            <input type="datetime-local" name="appointmentDate" id="appointmentDate"
-                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition p-3"
-                                required>
-                            <p class="text-sm text-gray-500 mt-2 italic">Hệ thống sẽ tự động chọn bác sĩ rảnh vào thời
-                                gian này.</p>
+                            <div class="bg-gray-100 rounded-xl p-6">
+                                <div class="mb-4">
+                                    <label class="block font-bold text-gray-800 mb-3 text-lg">Chọn ngày khám:</label>
+                                    <input type="date" id="selectDateByDate"
+                                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition p-3">
+                                </div>
+
+                                <div id="timeSlotsByDate" style="display: none;">
+                                    <label class="block font-semibold text-gray-700 mb-3">Chọn giờ khám:</label>
+
+                                    <div class="flex gap-4 mb-4 text-xs text-gray-600">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-4 h-4 bg-white border border-blue-400 rounded"></div>
+                                            <span>Có thể đặt</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-4 h-4 bg-blue-600 rounded"></div>
+                                            <span>Đang chọn</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-4 h-4 bg-gray-300 rounded"></div>
+                                            <span>Không khả dụng</span>
+                                        </div>
+                                    </div>
+
+                                    <div id="availableTimeSlotsByDate" class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                                    </div>
+
+                                    <div id="selectedTimeDisplayByDate"
+                                        class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg hidden text-center">
+                                        <p class="text-sm text-blue-800">
+                                            Đã chọn: <span id="selectedTimeTextByDate"
+                                                class="font-bold text-lg block mt-1"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-sm text-gray-500 mt-4 italic">* Hệ thống sẽ tự động chọn bác sĩ rảnh vào thời gian này.</p>
+                            </div>
+                            
+                            <input type="hidden" name="appointmentDate" id="appointmentDate" required>
                         </div>
 
                         <div id="doctorSection" class="mb-8" style="display: none;">
@@ -221,6 +254,91 @@
             const today = new Date().toISOString().split('T')[0];
             if (selectDate) selectDate.min = today;
 
+            // Elements for "by date" section
+            const selectDateByDate = document.getElementById('selectDateByDate');
+            const timeSlotsByDate = document.getElementById('timeSlotsByDate');
+            const availableTimeSlotsByDate = document.getElementById('availableTimeSlotsByDate');
+            const selectedTimeDisplayByDate = document.getElementById('selectedTimeDisplayByDate');
+            const selectedTimeTextByDate = document.getElementById('selectedTimeTextByDate');
+            
+            if (selectDateByDate) selectDateByDate.min = today;
+
+            // Handle date selection for "by date" method
+            if (selectDateByDate) {
+                selectDateByDate.addEventListener('change', function() {
+                    const selectedDate = new Date(this.value);
+                    const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
+                    const day = selectedDate.getDay();
+                    
+                    // Check if Sunday
+                    if (day === 0) {
+                        availableTimeSlotsByDate.innerHTML = '<div class="col-span-full text-center text-red-500 p-4 bg-red-50 rounded-lg border border-red-100">Chủ nhật không làm việc</div>';
+                        timeSlotsByDate.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Generate time slots from 09:00 to 17:00 (30 min intervals)
+                    const slots = generateTimeSlotsForDate(selectedDate);
+                    
+                    availableTimeSlotsByDate.innerHTML = '';
+                    slots.forEach(slot => {
+                        const isPast = new Date(slot.datetime) < new Date();
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        
+                        if (isPast) {
+                            button.className = 'p-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 h-14 flex flex-col items-center justify-center';
+                            button.disabled = true;
+                            button.innerHTML = `<span class="block font-semibold">${slot.time}</span><span class="text-xs">Qua giờ</span>`;
+                        } else {
+                            button.className = 'p-3 rounded-lg text-sm font-bold bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition cursor-pointer h-14 flex items-center justify-center';
+                            button.textContent = slot.time;
+                            
+                            button.addEventListener('click', function() {
+                                availableTimeSlotsByDate.querySelectorAll('button:not([disabled])').forEach(btn => {
+                                    btn.className = 'p-3 rounded-lg text-sm font-bold bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition cursor-pointer h-14 flex items-center justify-center';
+                                });
+                                
+                                this.className = 'p-3 rounded-lg text-sm font-bold bg-blue-600 border border-blue-600 text-white shadow-md cursor-pointer h-14 flex items-center justify-center';
+                                
+                                appointmentDate.value = slot.datetime;
+                                
+                                const displayDate = new Date(slot.datetime);
+                                const weekday = displayDate.toLocaleDateString('vi-VN', { weekday: 'long' });
+                                const day = displayDate.getDate();
+                                const month = displayDate.getMonth() + 1;
+                                const year = displayDate.getFullYear();
+                                const hours = String(displayDate.getHours()).padStart(2, '0');
+                                const minutes = String(displayDate.getMinutes()).padStart(2, '0');
+                                const displayText = `${hours}:${minutes} ${weekday}, ${day} tháng ${month}, ${year}`;
+                                selectedTimeTextByDate.textContent = displayText;
+                                selectedTimeDisplayByDate.classList.remove('hidden');
+                            });
+                        }
+                        
+                        availableTimeSlotsByDate.appendChild(button);
+                    });
+                    
+                    timeSlotsByDate.style.display = 'block';
+                });
+            }
+            
+            function generateTimeSlotsForDate(date) {
+                const slots = [];
+                const startHour = 9;
+                const endHour = 17;
+                
+                for (let hour = startHour; hour < endHour; hour++) {
+                    for (let min of [0, 30]) {
+                        const timeStr = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+                        const dateStr = date.toISOString().split('T')[0];
+                        const datetimeStr = `${dateStr}T${timeStr}`;
+                        slots.push({ time: timeStr, datetime: datetimeStr });
+                    }
+                }
+                return slots;
+            }
+
             bookingMethods.forEach(method => {
                 method.addEventListener('change', function () {
                     if (this.value === 'by_date') {
@@ -290,20 +408,10 @@
             if (selectDate) {
                 selectDate.addEventListener('change', function () {
                     const selectedDate = new Date(this.value);
-                    const dayOfWeekEn = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
+                    // Lấy tên ngày bằng tiếng Anh để so sánh với database
+                    const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
                     
-                    // Chuyển tên ngày từ tiếng Anh sang tiếng Việt
-                    const dayMap = {
-                        'Monday': 'Thứ Hai',
-                        'Tuesday': 'Thứ Ba',
-                        'Wednesday': 'Thứ Tư',
-                        'Thursday': 'Thứ Năm',
-                        'Friday': 'Thứ Sáu',
-                        'Saturday': 'Thứ Bảy',
-                        'Sunday': 'Chủ Nhật'
-                    };
-                    const dayOfWeek = dayMap[dayOfWeekEn];
-                    
+                    // Tìm lịch làm việc của bác sĩ cho ngày được chọn
                     const schedule = currentDoctorSchedules.find(s => s.dayOfWeek === dayOfWeek);
 
                     if (!schedule) {

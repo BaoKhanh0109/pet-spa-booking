@@ -23,9 +23,4 @@ class ServiceCategory extends Model
     {
         return $this->hasMany(Service::class, 'categoryID', 'categoryID');
     }
-
-    public function appointments()
-    {
-        return $this->hasMany(Appointment::class, 'service_categories', 'categoryID');
-    }
 }

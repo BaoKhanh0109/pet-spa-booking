@@ -26,7 +26,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::with(['pets', 'appointments.pet', 'appointments.services', 'appointments.serviceCategory'])
+        $user = User::with(['pets', 'appointments.pet', 'appointments.services.category'])
             ->withCount(['pets', 'appointments'])
             ->findOrFail($id);
         

@@ -53,9 +53,13 @@
                                     <div class="flex flex-col">
                                         <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Chi phí</span>
                                         <span class="text-lg font-bold text-blue-600">
-                                            Tùy size thú cưng
+                                            {{ number_format($sv->price) }}đ
                                         </span>
-                                        <span class="text-xs text-gray-400">Xem chi tiết để biết giá</span>
+                                        @auth
+                                            <span class="text-xs text-gray-400">Chọn thú cưng để xem giá chính xác</span>
+                                        @else
+                                            <span class="text-xs text-gray-400">Đăng nhập để xem giá theo size</span>
+                                        @endauth
                                     </div>
 
                                     <div class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl group-hover:bg-blue-700 transition duration-300 shadow-lg transform group-hover:scale-105 whitespace-nowrap">

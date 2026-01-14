@@ -169,7 +169,6 @@ class BookingController extends Controller
         }
 
         $appointment = Appointment::create([
-            'service_categories' => 1,
             'userID' => Auth::user()->userID,
             'petID' => $request->petID,
             'employeeID' => $employeeID,
@@ -219,7 +218,6 @@ class BookingController extends Controller
         }
 
         $appointment = Appointment::create([
-            'service_categories' => 2, // 2 = Y tế
             'userID' => Auth::user()->userID,
             'petID' => $request->petID,
             'employeeID' => $employeeID,
@@ -256,7 +254,9 @@ class BookingController extends Controller
             $capacity = $service->category->capacity;
             
             // Đếm số lượng thú cưng đang được trông giữ trong khoảng thời gian này
-            $occupiedCount = Appointment::where('service_categories', 3) // 3 = Trông giữ
+            $occupiedCount = Appointment::whereHas('services', function($q) {
+                $q->where('categoryID', 3); // 3 = Trông giữ
+            })
             ->where('status', '!=', 'Cancelled')
             ->where(function($query) use ($request) {
                 // Kiểm tra overlap: booking mới có overlap với booking cũ
@@ -285,7 +285,6 @@ class BookingController extends Controller
         $employeeID = $this->autoAssignStaff([$service->serviceID], $request->startDate);
 
         $appointment = Appointment::create([
-            'service_categories' => 3, // 3 = Trông giữ
             'userID' => Auth::user()->userID,
             'petID' => $request->petID,
             'employeeID' => $employeeID,
@@ -343,14 +342,8 @@ class BookingController extends Controller
         foreach($existingAppointments as $apt) {
             $aptStart = strtotime($apt->appointmentDate);
             
-            // Tính duration của appointment hiện có
-            $aptDuration = 0;
-            if($apt->service_categories == 1) { // 1 = Làm đẹp
-                $aptDuration = $apt->services()->sum('duration');
-            } else if($apt->service_categories == 2) { // 2 = Y tế
-                // Lấy duration từ services relationship
-                $aptDuration = $apt->services()->sum('duration');
-            }
+            // Tính duration của appointment hiện có từ services
+            $aptDuration = $apt->services()->sum('duration');
             
             $aptEnd = $aptStart + ($aptDuration * 60);
             
@@ -402,18 +395,17 @@ class BookingController extends Controller
         foreach($existingAppointments as $apt) {
             $aptStart = strtotime($apt->appointmentDate);
             
-            // Tính duration của appointment hiện có
-            $aptDuration = 0;
-            if($apt->service_categories == 1 || $apt->service_categories == 2) {
-                $aptDuration = $apt->services()->sum('duration');
-            } else if($apt->service_categories == 3 && $apt->endDate) {
-                // Nếu là dịch vụ trông giữ, kiểm tra overlap với khoảng thời gian
+            // Kiểm tra nếu là dịch vụ trông giữ (có endDate)
+            if($apt->endDate) {
                 $aptEnd = strtotime($apt->endDate);
                 if(!($endTime <= $aptStart || $startTime >= $aptEnd)) {
                     return true; // Có xung đột
                 }
                 continue;
             }
+            
+            // Tính duration từ services cho các dịch vụ thường
+            $aptDuration = $apt->services()->sum('duration');
             
             $aptEnd = $aptStart + ($aptDuration * 60);
             
@@ -470,7 +462,6 @@ class BookingController extends Controller
         ]);
 
         $appointment = Appointment::create([
-            'service_categories' => 1, // 1 = Làm đẹp (mặc định cho route cũ)
             'userID' => Auth::user()->userID,
             'petID' => $request->petID,
             'appointmentDate' => $request->appointmentDate,
@@ -486,7 +477,7 @@ class BookingController extends Controller
     
     public function history() {
         $appointments = Appointment::where('userID', Auth::user()->userID)
-                        ->with(['pet', 'serviceCategory', 'services', 'employee']) 
+                        ->with(['pet', 'services.category', 'employee']) 
                         ->orderBy('appointmentDate', 'desc')
                         ->get();
 
@@ -496,7 +487,7 @@ class BookingController extends Controller
     public function edit($id) {
         $appointment = Appointment::where('appointmentID', $id)
                                   ->where('userID', Auth::user()->userID)
-                                  ->with(['pet', 'serviceCategory', 'services', 'employee'])
+                                  ->with(['pet', 'services.category', 'employee'])
                                   ->firstOrFail();
 
         if ($appointment->status !== 'Pending') {
@@ -507,8 +498,9 @@ class BookingController extends Controller
         $pets = Pet::where('userID', Auth::user()->userID)->get();
         $pet = $appointment->pet;
 
-        // Dùng service_categories thay vì booking_type
-        if ($appointment->service_categories == 1) { // 1 = Làm đẹp
+        // Kiểm tra loại dịch vụ từ service category
+        $categoryID = $appointment->service_category_id;
+        if ($categoryID == 1) { // 1 = Làm đẹp
             $services = $this->getServicesByCategoryID(1);
             
             // Tính size và giá điều chỉnh cho từng dịch vụ
@@ -519,7 +511,7 @@ class BookingController extends Controller
             }
             
             return view('bookings.edit-beauty', compact('appointment', 'services', 'pet', 'pets'));
-        } elseif ($appointment->service_categories == 2) { // 2 = Y tế
+        } elseif ($categoryID == 2) { // 2 = Y tế
             $services = $this->getServicesByCategoryID(2);
             
             // Tính size và giá điều chỉnh cho từng dịch vụ
@@ -555,7 +547,8 @@ class BookingController extends Controller
                            ->with('error', 'Chỉ có thể chỉnh sửa lịch hẹn đang chờ phê duyệt!');
         }
 
-        if ($appointment->service_categories == 1) { // 1 = Làm đẹp
+        $categoryID = $appointment->service_category_id;
+        if ($categoryID == 1) { // 1 = Làm đẹp
             $request->validate([
                 'petID' => 'required',
                 'service_ids' => 'required|array',
@@ -588,7 +581,7 @@ class BookingController extends Controller
 
             $appointment->services()->sync($request->service_ids);
 
-        } elseif ($appointment->service_categories == 2) { // 2 = Y tế
+        } elseif ($categoryID == 2) { // 2 = Y tế
             $request->validate([
                 'petID' => 'required',
                 'serviceID' => 'required|exists:services,serviceID',
@@ -678,12 +671,8 @@ class BookingController extends Controller
         foreach($existingAppointments as $apt) {
             $aptStart = strtotime($apt->appointmentDate);
             
-            $aptDuration = 0;
-            if($apt->service_categories == 1) { // 1 = Làm đẹp
-                $aptDuration = $apt->services()->sum('duration');
-            } else if($apt->service_categories == 2) { // 2 = Y tế
-                $aptDuration = $apt->services()->sum('duration');
-            }
+            // Tính duration từ services
+            $aptDuration = $apt->services()->sum('duration');
             
             $aptEnd = $aptStart + ($aptDuration * 60);
             

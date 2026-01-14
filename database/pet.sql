@@ -208,8 +208,20 @@ INSERT INTO appointments (userID, petID, employeeID, appointmentDate, endDate, n
 -- Lịch 6: Y tế - Khám tổng quát (Completed)
 (3, 3, 1, '2025-12-18 10:30:00', NULL, 'Kiểm tra định kỳ', 'Completed', 1);
 
+<<<<<<< HEAD
 -- 9. Thêm Chi tiết dịch vụ trong lịch hẹn (Appointment Services)
 -- Làm đẹp và Y tế dùng bảng này để lưu services đã chọn
+=======
+-- Appointments
+INSERT INTO appointments (appointmentID, userID, petID, employeeID, appointmentDate, endDate, note, status, prefer_doctor) VALUES
+(1, 2, 1, 1, '2026-01-14 10:00:00', NULL, 'Khám định kỳ', 'Pending', 1),
+(2, 3, 3, 3, '2026-01-15 14:00:00', NULL, 'Cắt móng kỹ giúp em', 'Pending', 0),
+(3, 2, 2, 2, '2026-01-16 09:30:00', NULL, 'Tiêm mũi nhắc lại', 'Pending', 0),
+(4, 3, 5, 3, '2026-01-17 10:00:00', NULL, 'Spa thư giãn', 'Pending', 0),
+(5, 4, 4, 4, '2026-01-18 08:00:00', '2026-01-20 18:00:00', 'Đi công tác 3 ngày', 'Pending', 0);
+
+-- Appointment Services
+>>>>>>> db7f2074cd83aa48f3b4c32f7d2b532c80121efb
 INSERT INTO appointment_services (appointmentID, serviceID) VALUES
 -- Lịch 1 (Y tế): Khám bệnh
 (1, 1),

@@ -34,7 +34,7 @@
                             @foreach($appointments as $app)
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="py-4 px-6 text-gray-800">
-                                    {{ $app->serviceCategory->categoryName ?? 'N/A' }}
+                                    {{ $app->service_category->categoryName ?? 'N/A' }}
                                 </td>
                                 <td class="py-4 px-6 font-semibold text-gray-800">{{ $app->pet->petName }}</td>
                                 <td class="py-4 px-6">

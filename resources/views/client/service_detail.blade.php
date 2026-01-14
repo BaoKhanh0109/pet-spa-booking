@@ -50,10 +50,18 @@
                         </p>
 
                         @auth
+                            <!-- Hiển thị giá cơ bản trước -->
+                            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-lg font-bold text-gray-800">Giá cơ bản:</span>
+                                    <span class="text-3xl font-extrabold text-blue-600">{{ number_format($service->price) }}đ</span>
+                                </div>
+                            </div>
+                            
                             <!-- Chọn thú cưng để xem giá chính xác -->
                             <div class="bg-white rounded-xl border-2 border-blue-100 p-6">
                                 <h3 class="text-lg font-bold text-gray-800 mb-4">
-                                    <i class="fas fa-paw text-blue-600 mr-2"></i>Chọn thú cưng của bạn
+                                    <i class="fas fa-paw text-blue-600 mr-2"></i>Chọn thú cưng để xem giá chính xác
                                 </h3>
                                 
                                 @if($pets->count() > 0)
@@ -106,11 +114,20 @@
                                 @endif
                             </div>
                         @else
-                            <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-6 text-center">
-                                <i class="fas fa-info-circle text-yellow-600 text-3xl mb-3"></i>
-                                <p class="text-gray-700 mb-4">Đăng nhập để xem giá chính xác cho thú cưng của bạn!</p>
+                            <!-- Hiển thị giá cơ bản cho khách chưa đăng nhập -->
+                            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-lg font-bold text-gray-800">Giá cơ bản:</span>
+                                    <span class="text-3xl font-extrabold text-blue-600">{{ number_format($service->price) }}đ</span>
+                                </div>
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                    <p class="text-sm text-gray-700">
+                                        <i class="fas fa-info-circle text-yellow-600 mr-2"></i>
+                                        <strong>Đăng nhập</strong> để xem giá chính xác theo size thú cưng của bạn
+                                    </p>
+                                </div>
                                 <a href="{{ route('login') }}" 
-                                    class="inline-block px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-lg">
+                                    class="block text-center px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-lg">
                                     <i class="fas fa-sign-in-alt mr-2"></i>Đăng Nhập
                                 </a>
                             </div>

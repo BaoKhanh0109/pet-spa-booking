@@ -153,7 +153,7 @@
                                         </td>
 
                                         <td class="py-3 px-4">
-                                            {{ $appointment->serviceCategory ? $appointment->serviceCategory->categoryName : 'N/A' }}
+                                            {{ $appointment->service_category ? $appointment->service_category->categoryName : 'N/A' }}
                                         </td>
 
                                         <td class="py-3 px-4">

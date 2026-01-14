@@ -82,7 +82,6 @@ CREATE TABLE pets (
 );
 CREATE TABLE appointments (
     appointmentID INT PRIMARY KEY AUTO_INCREMENT,
-    service_categories INT NOT NULL,
     userID INT NOT NULL,
     petID INT NOT NULL,
     employeeID INT,
@@ -94,8 +93,7 @@ CREATE TABLE appointments (
     status VARCHAR(50) DEFAULT 'Pending',
     prefer_doctor TINYINT(1) DEFAULT 0,
     FOREIGN KEY (userID) REFERENCES users(userID),
-    FOREIGN KEY (employeeID) REFERENCES employees(employeeID),
-    FOREIGN KEY (service_categories) REFERENCES service_categories(categoryID)
+    FOREIGN KEY (employeeID) REFERENCES employees(employeeID)
 );
 
 
@@ -201,12 +199,12 @@ INSERT INTO pets (petID, userID, petName, species, breed, weight, backLength, ag
 (6, 2, 'Miu', 'Mèo', 'Munchkin', 2.50, 20.00, 1, 'miu.jpg', 'Chân ngắn, khỏe mạnh');
 
 -- Appointments
-INSERT INTO appointments (appointmentID, service_categories, userID, petID, employeeID, appointmentDate, endDate, note, status, prefer_doctor) VALUES
-(1, 2, 2, 1, 1, '2026-01-14 10:00:00', NULL, 'Khám định kỳ', 'Pending', 1),
-(2, 1, 3, 3, 3, '2026-01-15 14:00:00', NULL, 'Cắt móng kỹ giúp em', 'Pending', 0),
-(3, 2, 2, 2, 2, '2026-01-16 09:30:00', NULL, 'Tiêm mũi nhắc lại', 'Pending', 0),
-(4, 1, 3, 5, 3, '2026-01-17 10:00:00', NULL, 'Spa thư giãn', 'Pending', 0),
-(5, 3, 4, 4, 4, '2026-01-18 08:00:00', '2026-01-20 18:00:00', 'Đi công tác 3 ngày', 'Pending', 0);
+INSERT INTO appointments (appointmentID, userID, petID, employeeID, appointmentDate, endDate, note, status, prefer_doctor) VALUES
+(1, 2, 1, 1, '2026-01-14 10:00:00', NULL, 'Khám định kỳ', 'Pending', 1),
+(2, 3, 3, 3, '2026-01-15 14:00:00', NULL, 'Cắt móng kỹ giúp em', 'Pending', 0),
+(3, 2, 2, 2, '2026-01-16 09:30:00', NULL, 'Tiêm mũi nhắc lại', 'Pending', 0),
+(4, 3, 5, 3, '2026-01-17 10:00:00', NULL, 'Spa thư giãn', 'Pending', 0),
+(5, 4, 4, 4, '2026-01-18 08:00:00', '2026-01-20 18:00:00', 'Đi công tác 3 ngày', 'Pending', 0);
 
 -- Appointment Services
 INSERT INTO appointment_services (appointmentID, serviceID) VALUES

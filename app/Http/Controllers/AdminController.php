@@ -30,7 +30,7 @@ class AdminController extends Controller
     }
 
     public function indexAppointments() {
-        $appointments = Appointment::with(['user', 'pet', 'services', 'serviceCategory', 'employee.role'])
+        $appointments = Appointment::with(['user', 'pet', 'services.category', 'employee.role'])
                         ->orderBy('appointmentDate', 'desc')
                         ->get();
                         

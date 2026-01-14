@@ -29,7 +29,6 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `appointments` (
   `appointmentID` int(11) NOT NULL,
-  `service_categories` int(11) NOT NULL,
   `userID` int(11) NOT NULL,
   `petID` int(11) NOT NULL,
   `employeeID` int(11) DEFAULT NULL,
@@ -46,12 +45,12 @@ CREATE TABLE `appointments` (
 -- Dumping data for table `appointments`
 --
 
-INSERT INTO `appointments` (`appointmentID`, `service_categories`, `userID`, `petID`, `employeeID`, `appointmentDate`, `endDate`, `note`, `created_at`, `updated_at`, `status`, `prefer_doctor`) VALUES
-(1, 2, 2, 1, 1, '2026-01-14 10:00:00', NULL, 'Khám định kỳ', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 1),
-(2, 1, 3, 3, 3, '2026-01-15 14:00:00', NULL, 'Cắt móng kỹ giúp em', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0),
-(3, 2, 2, 2, 2, '2026-01-16 09:30:00', NULL, 'Tiêm mũi nhắc lại', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0),
-(4, 1, 3, 5, 3, '2026-01-17 10:00:00', NULL, 'Spa thư giãn', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0),
-(5, 3, 4, 4, 4, '2026-01-18 08:00:00', '2026-01-20 18:00:00', 'Đi công tác 3 ngày', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0);
+INSERT INTO `appointments` (`appointmentID`, `userID`, `petID`, `employeeID`, `appointmentDate`, `endDate`, `note`, `created_at`, `updated_at`, `status`, `prefer_doctor`) VALUES
+(1, 2, 1, 1, '2026-01-14 10:00:00', NULL, 'Khám định kỳ', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 1),
+(2, 3, 3, 3, '2026-01-15 14:00:00', NULL, 'Cắt móng kỹ giúp em', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0),
+(3, 2, 2, 2, '2026-01-16 09:30:00', NULL, 'Tiêm mũi nhắc lại', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0),
+(4, 3, 5, 3, '2026-01-17 10:00:00', NULL, 'Spa thư giãn', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0),
+(5, 4, 4, 4, '2026-01-18 08:00:00', '2026-01-20 18:00:00', 'Đi công tác 3 ngày', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0);
 
 -- --------------------------------------------------------
 
@@ -319,8 +318,7 @@ INSERT INTO `work_schedules` (`scheduleID`, `employeeID`, `dayOfWeek`, `startTim
 ALTER TABLE `appointments`
   ADD PRIMARY KEY (`appointmentID`),
   ADD KEY `userID` (`userID`),
-  ADD KEY `employeeID` (`employeeID`),
-  ADD KEY `service_categories` (`service_categories`);
+  ADD KEY `employeeID` (`employeeID`);
 
 --
 -- Indexes for table `appointment_services`
@@ -460,8 +458,7 @@ ALTER TABLE `work_schedules`
 --
 ALTER TABLE `appointments`
   ADD CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `users` (`userID`),
-  ADD CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`employeeID`) REFERENCES `employees` (`employeeID`),
-  ADD CONSTRAINT `appointments_ibfk_3` FOREIGN KEY (`service_categories`) REFERENCES `service_categories` (`categoryID`);
+  ADD CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`employeeID`) REFERENCES `employees` (`employeeID`);
 
 --
 -- Constraints for table `appointment_services`

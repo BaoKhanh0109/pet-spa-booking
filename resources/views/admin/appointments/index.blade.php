@@ -60,7 +60,7 @@
                                 </td>
                                 <td class="py-4 px-6 font-semibold text-gray-800">
                                     {{ \Carbon\Carbon::parse($app->appointmentDate)->format('d/m/Y H:i') }}
-                                    @if($app->service_categories == 3 && $app->endDate)
+                                    @if($app->endDate)
                                         <div class="text-xs text-orange-600 mt-1">
                                             <i class="fas fa-calendar-check mr-1"></i>Đón: {{ \Carbon\Carbon::parse($app->endDate)->format('d/m/Y') }}
                                         </div>
@@ -108,9 +108,9 @@
                                         <span class="text-gray-400 italic">Chưa có dịch vụ</span>
                                     @endif
                                     
-                                    @if($app->serviceCategory)
+                                    @if($app->service_category)
                                         <div class="text-xs text-gray-500 mt-1">
-                                            <span class="font-semibold">Loại:</span> {{ $app->serviceCategory->categoryName }}
+                                            <span class="font-semibold">Loại:</span> {{ $app->service_category->categoryName }}
                                         </div>
                                     @endif
                                 </td>

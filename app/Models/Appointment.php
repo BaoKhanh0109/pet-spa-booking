@@ -14,7 +14,6 @@ class Appointment extends Model
     public $timestamps = true; 
 
     protected $fillable = [
-        'service_categories',
         'userID',
         'petID',
         'employeeID',
@@ -35,21 +34,29 @@ class Appointment extends Model
         return $this->belongsTo(Pet::class, 'petID', 'petID');
     }
 
-    // 3. Lịch hẹn thuộc về 1 Service Category
-    public function serviceCategory()
-    {
-        return $this->belongsTo(ServiceCategory::class, 'service_categories', 'categoryID');
-    }
-
-    // 4. Lịch hẹn được làm bởi 1 Nhân viên (Employee) - Tùy chọn
+    // Lịch hẹn được làm bởi 1 Nhân viên (Employee) - Tùy chọn
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'employeeID', 'employeeID');
     }
 
-    // 5. Lịch hẹn có nhiều dịch vụ cụ thể (thông qua appointment_services)
+    // Lịch hẹn có nhiều dịch vụ cụ thể (thông qua appointment_services)
     public function services()
     {
         return $this->belongsToMany(Service::class, 'appointment_services', 'appointmentID', 'serviceID');
+    }
+
+    // Accessor để lấy service category từ service đầu tiên
+    public function getServiceCategoryAttribute()
+    {
+        $firstService = $this->services()->first();
+        return $firstService ? $firstService->category : null;
+    }
+
+    // Accessor để lấy service category ID từ service đầu tiên
+    public function getServiceCategoryIdAttribute()
+    {
+        $firstService = $this->services()->first();
+        return $firstService ? $firstService->categoryID : null;
     }
 }

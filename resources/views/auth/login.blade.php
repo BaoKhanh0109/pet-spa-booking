@@ -5,9 +5,6 @@
             <h2 class="mt-4 text-3xl font-extrabold text-gray-900">
                 Chào mừng trở lại!
             </h2>
-            <p class="mt-2 text-sm text-gray-600">
-                Đăng nhập để đặt lịch chăm sóc Boss ngay.
-            </p>
         </div>
 
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -23,7 +20,7 @@
                         <div class="mt-1">
                             <input id="email" name="email" type="email" autocomplete="email" required 
                                    class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
-                                   placeholder="nguoidung@example.com" value="{{ old('email') }}">
+                                    value="{{ old('email') }}">
                             <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-500 text-sm" />
                         </div>
                     </div>
@@ -32,8 +29,7 @@
                         <label for="password" class="block text-sm font-medium text-gray-700">Mật khẩu</label>
                         <div class="mt-1">
                             <input id="password" name="password" type="password" autocomplete="current-password" required 
-                                   class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
-                                   placeholder="••••••••">
+                                   class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition">
                             <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-500 text-sm" />
                         </div>
                     </div>

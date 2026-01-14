@@ -42,17 +42,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Trạng thái -->
-                            <div>
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="checkbox" name="is_active" value="1" 
-                                        {{ old('is_active', $role->is_active) ? 'checked' : '' }}
-                                        class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-2 text-sm text-gray-700 font-medium">Kích hoạt chức vụ này</span>
-                                </label>
-                                <p class="mt-1 text-xs text-gray-500">Chức vụ đang hoạt động sẽ hiển thị trong danh sách chọn khi thêm/sửa nhân viên</p>
-                            </div>
-
                             <!-- Thông tin nhân viên -->
                             @if($role->employees->count() > 0)
                                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">

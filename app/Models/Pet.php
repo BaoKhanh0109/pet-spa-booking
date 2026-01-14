@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models; // Namespace phải là App\Models
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,12 +15,10 @@ class Pet extends Model
         'weight', 'backLength', 'age', 'medicalHistory', 'petImage' 
     ];
     
-    // Quan hệ với User (để kiểm tra chính chủ)
     public function user() {
         return $this->belongsTo(User::class, 'userID', 'userID');
     }
 
-    // Quan hệ với Appointments
     public function appointments() {
         return $this->hasMany(Appointment::class, 'petID', 'petID');
     }

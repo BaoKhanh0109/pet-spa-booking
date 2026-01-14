@@ -133,8 +133,8 @@
                             if (data.length > 0) {
                                 data.forEach(staff => {
                                     const staffCard = `
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-pink-400 hover:bg-pink-50 transition">
-                                        <input type="radio" name="employeeID" value="${staff.employeeID}" class="staff-radio w-5 h-5 text-pink-600">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition">
+                                        <input type="radio" name="employeeID" value="${staff.employeeID}" class="staff-radio w-5 h-5 text-blue-600">
                                         <div class="ml-3">
                                             <div class="font-semibold text-gray-800">${staff.employeeName}</div>
                                             <div class="text-sm text-gray-600">${staff.role || 'Nhân viên'}</div>
@@ -154,28 +154,18 @@
                                         radio.addEventListener('change', function() {
                                             if (this.checked) {
                                                 autoSelectRadio.checked = false;
-                                                autoSelectLabel.classList.remove('border-blue-500', 'bg-blue-50');
-                                                autoSelectLabel.classList.add('border-gray-200');
-                                                
-                                                // Highlight selected staff
-                                                document.querySelectorAll('.staff-radio').forEach(r => {
-                                                    r.closest('label').classList.remove('border-pink-400', 'bg-pink-50');
-                                                    r.closest('label').classList.add('border-gray-200');
-                                                });
-                                                this.closest('label').classList.remove('border-gray-200');
-                                                this.closest('label').classList.add('border-pink-400', 'bg-pink-50');
                                             }
                                         });
                                     });
                                 }, 100);
                             } else {
-                                staffList.innerHTML = '<div class="col-span-2 text-center text-amber-600 p-4">⚠️ Không có nhân viên rảnh vào thời gian này.<br><small>Vui lòng chọn thời gian trong giờ làm việc (09:00 - 17:00, Thứ 2 - Thứ 7).<br>Hoặc để hệ thống tự động sắp xếp lịch phù hợp.</small></div>';
+                                staffList.innerHTML = '<div class="col-span-2 text-center text-amber-600 p-4">Không có nhân viên rảnh vào thời gian này.<br><small>Vui lòng chọn thời gian trong giờ làm việc (09:00 - 17:00, Thứ 2 - Thứ 7).<br>Hoặc để hệ thống tự động sắp xếp lịch phù hợp.</small></div>';
                                 staffSection.style.display = 'block';
                             }
                         })
                         .catch(error => {
                             console.error('Error loading staff:', error);
-                            staffList.innerHTML = '<div class="col-span-2 text-center text-red-600 p-4">❌ Có lỗi xảy ra khi tải danh sách nhân viên.<br><small>Vui lòng thử lại hoặc để hệ thống tự chọn.</small></div>';
+                            staffList.innerHTML = '<div class="col-span-2 text-center text-red-600 p-4">Có lỗi xảy ra khi tải danh sách nhân viên.<br><small>Vui lòng thử lại hoặc để hệ thống tự chọn.</small></div>';
                             staffSection.style.display = 'block';
                         });
                 } else {
@@ -197,13 +187,7 @@
                     // Bỏ chọn tất cả nhân viên
                     document.querySelectorAll('input[name="employeeID"]').forEach(radio => {
                         radio.checked = false;
-                        radio.closest('label').classList.remove('border-pink-400', 'bg-pink-50');
-                        radio.closest('label').classList.add('border-gray-200');
                     });
-                    
-                    // Highlight "tự động chọn"
-                    autoSelectLabel.classList.remove('border-gray-200');
-                    autoSelectLabel.classList.add('border-blue-500', 'bg-blue-50');
                 }
             });
 

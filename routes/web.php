@@ -10,42 +10,32 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AdminServiceController;
 use App\Http\Controllers\GoogleAuthController;
 
-// 1. Trang chủ (Không cần đăng nhập cũng xem được)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/dich-vu', [ServiceController::class, 'index'])->name('client.services');
 Route::get('/dich-vu/{id}', [ServiceController::class, 'show'])->name('services.show');
 Route::post('/dich-vu/tinh-gia', [ServiceController::class, 'calculatePrice'])->name('services.calculate-price')->middleware('auth');
 
-// 2. Nhóm các trang CẦN ĐĂNG NHẬP
 Route::middleware(['auth'])->group(function () {
-    // Routes đặt lịch mới theo danh mục
     Route::get('/dat-lich/chon-danh-muc', [BookingController::class, 'selectCategory'])->name('booking.select-category');
     
-    // Routes đặt lịch làm đẹp
     Route::get('/dat-lich/lam-dep', [BookingController::class, 'createBeauty'])->name('booking.beauty');
     Route::post('/dat-lich/lam-dep', [BookingController::class, 'storeBeauty'])->name('booking.beauty.store');
     
-    // Routes đặt lịch y tế
     Route::get('/dat-lich/y-te', [BookingController::class, 'createMedical'])->name('booking.medical');
     Route::post('/dat-lich/y-te', [BookingController::class, 'storeMedical'])->name('booking.medical.store');
     
-    // Routes đặt lịch trông giữ
     Route::get('/dat-lich/trong-giu', [BookingController::class, 'createPetCare'])->name('booking.pet-care');
     Route::post('/dat-lich/trong-giu', [BookingController::class, 'storePetCare'])->name('booking.pet-care.store');
     
-    // API routes
     Route::get('/api/available-staff', [BookingController::class, 'getAvailableStaff'])->name('booking.available-staff');
     Route::get('/api/doctor-schedule', [BookingController::class, 'getDoctorSchedule'])->name('booking.doctor-schedule');
     
-    // Routes cũ (giữ lại để tương thích ngược)
     Route::get('/dat-lich', [BookingController::class, 'selectCategory'])->name('booking.create');
     Route::post('/dat-lich', [BookingController::class, 'store'])->name('booking.store');
 
-    // Lịch sử đặt lịch
     Route::get('/lich-su-dat', [BookingController::class, 'history'])->name('booking.history');
     Route::get('/booking/history', [BookingController::class, 'history'])->name('booking.history');
     
-    // Routes chỉnh sửa và xóa lịch hẹn
     Route::get('/booking/{id}/edit', [BookingController::class, 'edit'])->name('booking.edit');
     Route::put('/booking/{id}', [BookingController::class, 'update'])->name('booking.update');
     Route::delete('/booking/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
@@ -65,13 +55,10 @@ Route::middleware(['auth', 'admin'])
     Route::get('/appointments/{id}/{status}', [App\Http\Controllers\AdminController::class, 'updateStatus'])
         ->name('appointments.status');
     
-    // Routes quản lý nhân viên
     Route::resource('employees', App\Http\Controllers\Admin\EmployeeController::class);
     
-    // Routes quản lý chức vụ
     Route::resource('roles', App\Http\Controllers\Admin\EmployeeRoleController::class);
     
-    // Routes quản lý người dùng
     Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::get('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show');
     Route::delete('/users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
@@ -97,13 +84,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/my-pets/create', [PetController::class, 'create'])->name('pets.create');
     Route::post('/my-pets', [PetController::class, 'store'])->name('pets.store');
     
-    // Route sửa và xóa (cần truyền ID)
     Route::get('/my-pets/{id}/edit', [PetController::class, 'edit'])->name('pets.edit');
     Route::put('/my-pets/{id}', [PetController::class, 'update'])->name('pets.update');
     Route::delete('/my-pets/{id}', [PetController::class, 'destroy'])->name('pets.destroy');
 });
 
-// Google OAuth Routes
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
 

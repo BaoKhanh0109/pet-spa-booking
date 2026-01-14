@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 14, 2026 at 06:01 AM
+-- Generation Time: Jan 14, 2026 at 11:24 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -50,7 +50,8 @@ INSERT INTO `appointments` (`appointmentID`, `userID`, `petID`, `employeeID`, `a
 (2, 3, 3, 3, '2026-01-15 14:00:00', NULL, 'Cắt móng kỹ giúp em', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0),
 (3, 2, 2, 2, '2026-01-16 09:30:00', NULL, 'Tiêm mũi nhắc lại', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0),
 (4, 3, 5, 3, '2026-01-17 10:00:00', NULL, 'Spa thư giãn', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0),
-(5, 4, 4, 4, '2026-01-18 08:00:00', '2026-01-20 18:00:00', 'Đi công tác 3 ngày', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0);
+(5, 4, 4, 4, '2026-01-18 08:00:00', '2026-01-20 18:00:00', 'Đi công tác 3 ngày', '2026-01-13 21:25:56', '2026-01-13 21:25:56', 'Pending', 0),
+(13, 6, 8, 3, '2026-01-15 09:30:00', NULL, NULL, '2026-01-14 17:04:07', '2026-01-14 17:04:07', 'Pending', 0);
 
 -- --------------------------------------------------------
 
@@ -74,7 +75,8 @@ INSERT INTO `appointment_services` (`appointment_servicesId`, `appointmentID`, `
 (3, 2, 4),
 (4, 3, 2),
 (5, 4, 3),
-(6, 5, 5);
+(6, 5, 5),
+(15, 13, 4);
 
 -- --------------------------------------------------------
 
@@ -100,7 +102,7 @@ INSERT INTO `employees` (`employeeID`, `employeeName`, `avatar`, `roleID`, `phon
 (1, 'Nguyễn Văn An', 'employees/1JbK17IVnl31aXv0tpVkWbrnwhtl9Gzb7OFZZWqL.jpg', 1, '0901111111', 'bs.an@petcare.com', NULL),
 (2, 'Lê Thị Lan', 'employees/TKBY5R40we0lAEskHbeLiEm0UM625no4reJ6sH0Y.jpg', 1, '0902222222', 'bs.lan@petcare.com', NULL),
 (3, 'Trần Văn Hùng', 'employees/7Wa1gbHEyn5U4pkHrgFBl9FUdA8YQ5gJZ5rQ4bv2.jpg', 2, '0903333333', 'hung.groomer@petcare.com', NULL),
-(4, 'Phạm Thị Mai', 'employees/ycog7A5AfK13kPTf1BnPFLSbhJp0nRMdJTTOZAsO.jpg', 3, '0904444444', 'mai.care@petcare.com', NULL);
+(4, 'Phạm Thị Như', 'employees/ycog7A5AfK13kPTf1BnPFLSbhJp0nRMdJTTOZAsO.jpg', 3, '0904444444', 'mai.care@petcare.com', NULL);
 
 -- --------------------------------------------------------
 
@@ -123,9 +125,7 @@ CREATE TABLE `employee_roles` (
 INSERT INTO `employee_roles` (`roleID`, `roleName`, `description`, `created_at`, `updated_at`) VALUES
 (1, 'Bác sĩ thú y', 'Khám bệnh, chẩn đoán và điều trị cho thú cưng', '2026-01-13 21:25:56', '2026-01-13 21:25:56'),
 (2, 'Chuyên viên chăm sóc', 'Cắt tỉa, tạo kiểu và làm đẹp cho thú cưng', '2026-01-13 21:25:56', '2026-01-14 11:22:19'),
-(3, 'Nhân viên chăm sóc', 'Chăm sóc, trông giữ thú cưng', '2026-01-13 21:25:56', '2026-01-13 21:25:56'),
-(4, 'Trợ lý bác sĩ', 'Hỗ trợ bác sĩ trong quá trình khám và điều trị', '2026-01-13 21:25:56', '2026-01-13 21:25:56'),
-(5, 'Lễ tân', 'Tiếp đón và tư vấn khách hàng', '2026-01-13 21:25:56', '2026-01-13 21:25:56');
+(3, 'Nhân viên trông giữ', 'Chăm sóc, trông giữ thú cưng', '2026-01-13 21:25:56', '2026-01-14 16:27:37');
 
 -- --------------------------------------------------------
 
@@ -183,7 +183,8 @@ INSERT INTO `pets` (`petID`, `userID`, `petName`, `species`, `breed`, `weight`, 
 (4, 4, 'Vàng', 'Chó', 'Chó cỏ', 10.00, 35.00, 2, 'vang.jpg', NULL),
 (5, 3, 'Max', 'Chó', 'Husky', 22.00, 55.00, 3, 'max.jpg', 'Tiêm phòng đầy đủ'),
 (6, 2, 'Miu', 'Mèo', 'Munchkin', 2.50, 20.00, 1, 'miu.jpg', 'Chân ngắn, khỏe mạnh'),
-(8, 6, 'vang', 'Chó', 'co', 15.00, 50.00, 2, 'pets/3IXujMrATtcCurWERPUejztQIXW4YzapJfXEY7mg.jpg', NULL);
+(8, 6, 'Vàng', 'Chó', 'Chó cỏ', 15.00, 50.00, 2, 'pets/3IXujMrATtcCurWERPUejztQIXW4YzapJfXEY7mg.jpg', NULL),
+(9, 6, 'Bún', 'Mèo', 'mèo anh lông ngắn', 4.00, 30.00, 2, 'pets/P7x5ocmj7Gb59fnP5q615HmmYX6rAAaeyRPi8HLi.jpg', NULL);
 
 -- --------------------------------------------------------
 
@@ -263,7 +264,7 @@ INSERT INTO `users` (`userID`, `email`, `password`, `google_id`, `remember_token
 (3, 'user2@gmail.com', '$2y$12$LQv3c1yycn1FvTTLW4HKpuP9Tc1xJbEz/.k.x8tDp6YrZ1EzDqmJe', NULL, NULL, 'Trần Thị B', '0922222222', 'Quận 3, TP.HCM', 'user', '2026-01-13 21:25:56', '2026-01-13 21:25:56'),
 (4, 'user3@gmail.com', '$2y$12$LQv3c1yycn1FvTTLW4HKpuP9Tc1xJbEz/.k.x8tDp6YrZ1EzDqmJe', NULL, NULL, 'Lê Văn C', '0933333333', 'Quận 7, TP.HCM', 'user', '2026-01-13 21:25:56', '2026-01-13 21:25:56'),
 (6, 'duongbaokhanh123tv@gmail.com', '$2y$12$IgBpHUKiEQZj/271wWvHEerpLHprtecIuaIL9iK1Nb/VdCmneGhs6', '104212654730297708473', NULL, 'Khanh Dương', '', '', 'user', '2026-01-13 22:57:19', '2026-01-13 22:57:19'),
-(7, 'admin@gmail.com', '$2y$12$E5usCUjpU5viZ9LSGcQt/ex4MNhA43.hOMektQXu1JbfWx9lUBD6a', NULL, NULL, 'Bảo Khanh', '0396569746', 'Vĩnh Long', 'admin', '2026-01-14 11:16:36', '2026-01-14 11:19:39');
+(7, 'admin@gmail.com', '$2y$12$zrARCfsEu9dC3XPqMEtPG.q1VxYALrI1Ve2IRFAI6A6GzeaRtAsym', NULL, NULL, 'Bảo Khanh', '0396569746', 'Vĩnh Long', 'admin', '2026-01-14 11:16:36', '2026-01-14 16:31:50');
 
 -- --------------------------------------------------------
 
@@ -393,13 +394,13 @@ ALTER TABLE `work_schedules`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `appointmentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `appointmentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `appointment_services`
 --
 ALTER TABLE `appointment_services`
-  MODIFY `appointment_servicesId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `appointment_servicesId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `employees`
@@ -423,7 +424,7 @@ ALTER TABLE `employee_service`
 -- AUTO_INCREMENT for table `pets`
 --
 ALTER TABLE `pets`
-  MODIFY `petID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `petID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `services`

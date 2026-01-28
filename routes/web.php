@@ -57,6 +57,14 @@ Route::middleware(['auth', 'admin'])
     
     Route::resource('employees', App\Http\Controllers\Admin\EmployeeController::class);
     
+    // Routes cho quản lý lịch làm việc của nhân viên
+    Route::post('/employees/{id}/schedules', [App\Http\Controllers\Admin\EmployeeController::class, 'storeSchedule'])
+        ->name('employees.schedules.store');
+    Route::put('/employees/{id}/schedules/{scheduleId}', [App\Http\Controllers\Admin\EmployeeController::class, 'updateSchedule'])
+        ->name('employees.schedules.update');
+    Route::delete('/employees/{id}/schedules/{scheduleId}', [App\Http\Controllers\Admin\EmployeeController::class, 'destroySchedule'])
+        ->name('employees.schedules.destroy');
+    
     Route::resource('roles', App\Http\Controllers\Admin\EmployeeRoleController::class);
     
     Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');

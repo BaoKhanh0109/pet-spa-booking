@@ -146,7 +146,83 @@ class EmployeeController extends Controller
      */
     public function show($id)
     {
-        $employee = Employee::with(['services', 'role', 'workSchedules', 'appointments'])->findOrFail($id);
+        $employee = Employee::with(['services', 'role', 'workSchedules', 'appointments.user', 'appointments.pet', 'appointments.services'])->findOrFail($id);
         return view('admin.employees.show', compact('employee'));
+    }
+
+    /**
+     * Thêm lịch làm việc cho nhân viên
+     */
+    public function storeSchedule(Request $request, $id)
+    {
+        $employee = Employee::findOrFail($id);
+        
+        $request->validate([
+            'dayOfWeek' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'startTime' => 'required|date_format:H:i',
+            'endTime' => 'required|date_format:H:i|after:startTime',
+        ]);
+
+        // Kiểm tra xem đã có lịch trong ngày này chưa
+        $exists = $employee->workSchedules()
+            ->where('dayOfWeek', $request->dayOfWeek)
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Nhân viên đã có lịch làm việc trong ngày này!');
+        }
+
+        $employee->workSchedules()->create([
+            'dayOfWeek' => $request->dayOfWeek,
+            'startTime' => $request->startTime,
+            'endTime' => $request->endTime,
+        ]);
+
+        return back()->with('success', 'Thêm lịch làm việc thành công!');
+    }
+
+    /**
+     * Cập nhật lịch làm việc
+     */
+    public function updateSchedule(Request $request, $id, $scheduleId)
+    {
+        $employee = Employee::findOrFail($id);
+        $schedule = $employee->workSchedules()->findOrFail($scheduleId);
+        
+        $request->validate([
+            'dayOfWeek' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'startTime' => 'required|date_format:H:i',
+            'endTime' => 'required|date_format:H:i|after:startTime',
+        ]);
+
+        // Kiểm tra trùng lặp (ngoại trừ schedule hiện tại)
+        $exists = $employee->workSchedules()
+            ->where('dayOfWeek', $request->dayOfWeek)
+            ->where('scheduleID', '!=', $scheduleId)
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Nhân viên đã có lịch làm việc trong ngày này!');
+        }
+
+        $schedule->update([
+            'dayOfWeek' => $request->dayOfWeek,
+            'startTime' => $request->startTime,
+            'endTime' => $request->endTime,
+        ]);
+
+        return back()->with('success', 'Cập nhật lịch làm việc thành công!');
+    }
+
+    /**
+     * Xóa lịch làm việc
+     */
+    public function destroySchedule($id, $scheduleId)
+    {
+        $employee = Employee::findOrFail($id);
+        $schedule = $employee->workSchedules()->findOrFail($scheduleId);
+        $schedule->delete();
+
+        return back()->with('success', 'Xóa lịch làm việc thành công!');
     }
 }

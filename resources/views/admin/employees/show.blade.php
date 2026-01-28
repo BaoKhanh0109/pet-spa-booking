@@ -98,14 +98,49 @@
                     <!-- Lịch làm việc -->
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6">
-                            <h3 class="text-lg font-bold text-gray-900 mb-4">
-                                <i class="fas fa-calendar-alt mr-2 text-green-500"></i>Lịch làm việc
-                            </h3>
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-bold text-gray-900">
+                                    <i class="fas fa-calendar-alt mr-2 text-green-500"></i>Lịch làm việc
+                                </h3>
+                                <button onclick="openScheduleModal()"
+                                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
+                                    <i class="fas fa-plus mr-1"></i>Thêm lịch
+                                </button>
+                            </div>
+
+                            @if (session('success'))
+                                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
+
+                            @if (session('error'))
+                                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                                    {{ session('error') }}
+                                </div>
+                            @endif
+
                             @if ($employee->workSchedules->count() > 0)
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    @foreach ($employee->workSchedules as $schedule)
-                                        <div class="flex items-center justify-between p-3 border rounded-lg">
-                                            <div>
+                                <div class="space-y-2">
+                                    @php
+                                        $dayOrder = [
+                                            'Monday' => 1,
+                                            'Tuesday' => 2,
+                                            'Wednesday' => 3,
+                                            'Thursday' => 4,
+                                            'Friday' => 5,
+                                            'Saturday' => 6,
+                                            'Sunday' => 7,
+                                        ];
+                                        $sortedSchedules = $employee->workSchedules->sortBy(function ($schedule) use ($dayOrder) {
+                                            return $dayOrder[$schedule->dayOfWeek] ?? 8;
+                                        });
+                                    @endphp
+
+                                    @foreach ($sortedSchedules as $schedule)
+                                        <div
+                                            class="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition">
+                                            <div class="flex-1">
                                                 <span class="font-semibold text-gray-800">
                                                     @switch($schedule->dayOfWeek)
                                                         @case('Monday')
@@ -137,10 +172,27 @@
                                                         @break
                                                     @endswitch
                                                 </span>
+                                                <span
+                                                    class="ml-3 text-sm text-gray-600">{{ date('H:i', strtotime($schedule->startTime)) }}
+                                                    - {{ date('H:i', strtotime($schedule->endTime)) }}</span>
                                             </div>
-                                            <span
-                                                class="text-sm text-gray-600">{{ date('H:i', strtotime($schedule->startTime)) }}
-                                                - {{ date('H:i', strtotime($schedule->endTime)) }}</span>
+                                            <div class="flex gap-2">
+                                                <button
+                                                    onclick="openEditScheduleModal({{ $schedule->scheduleID }}, '{{ $schedule->dayOfWeek }}', '{{ date('H:i', strtotime($schedule->startTime)) }}', '{{ date('H:i', strtotime($schedule->endTime)) }}')"
+                                                    class="text-blue-600 hover:text-blue-800 text-sm">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <form
+                                                    action="{{ route('admin.employees.schedules.destroy', [$employee->employeeID, $schedule->scheduleID]) }}"
+                                                    method="POST" class="inline"
+                                                    onsubmit="return confirm('Bạn có chắc muốn xóa lịch này?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
@@ -197,4 +249,151 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Thêm Lịch Làm Việc -->
+    <div id="scheduleModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-900">Thêm Lịch Làm Việc</h3>
+                <button onclick="closeScheduleModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form action="{{ route('admin.employees.schedules.store', $employee->employeeID) }}" method="POST">
+                @csrf
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ngày trong tuần <span
+                                class="text-red-500">*</span></label>
+                        <select name="dayOfWeek" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="">-- Chọn ngày --</option>
+                            <option value="Monday">Thứ Hai</option>
+                            <option value="Tuesday">Thứ Ba</option>
+                            <option value="Wednesday">Thứ Tư</option>
+                            <option value="Thursday">Thứ Năm</option>
+                            <option value="Friday">Thứ Sáu</option>
+                            <option value="Saturday">Thứ Bảy</option>
+                            <option value="Sunday">Chủ Nhật</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Giờ bắt đầu <span
+                                class="text-red-500">*</span></label>
+                        <input type="time" name="startTime" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Giờ kết thúc <span
+                                class="text-red-500">*</span></label>
+                        <input type="time" name="endTime" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button" onclick="closeScheduleModal()"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
+                        Hủy
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition">
+                        Thêm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Sửa Lịch Làm Việc -->
+    <div id="editScheduleModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-900">Sửa Lịch Làm Việc</h3>
+                <button onclick="closeEditScheduleModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editScheduleForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ngày trong tuần <span
+                                class="text-red-500">*</span></label>
+                        <select id="edit_dayOfWeek" name="dayOfWeek" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Chọn ngày --</option>
+                            <option value="Monday">Thứ Hai</option>
+                            <option value="Tuesday">Thứ Ba</option>
+                            <option value="Wednesday">Thứ Tư</option>
+                            <option value="Thursday">Thứ Năm</option>
+                            <option value="Friday">Thứ Sáu</option>
+                            <option value="Saturday">Thứ Bảy</option>
+                            <option value="Sunday">Chủ Nhật</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Giờ bắt đầu <span
+                                class="text-red-500">*</span></label>
+                        <input type="time" id="edit_startTime" name="startTime" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Giờ kết thúc <span
+                                class="text-red-500">*</span></label>
+                        <input type="time" id="edit_endTime" name="endTime" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button" onclick="closeEditScheduleModal()"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
+                        Hủy
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                        Cập nhật
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openScheduleModal() {
+            document.getElementById('scheduleModal').classList.remove('hidden');
+        }
+
+        function closeScheduleModal() {
+            document.getElementById('scheduleModal').classList.add('hidden');
+        }
+
+        function openEditScheduleModal(scheduleId, dayOfWeek, startTime, endTime) {
+            const form = document.getElementById('editScheduleForm');
+            form.action = "{{ route('admin.employees.schedules.update', [$employee->employeeID, ':scheduleId']) }}".replace(
+                ':scheduleId', scheduleId);
+
+            document.getElementById('edit_dayOfWeek').value = dayOfWeek;
+            document.getElementById('edit_startTime').value = startTime;
+            document.getElementById('edit_endTime').value = endTime;
+
+            document.getElementById('editScheduleModal').classList.remove('hidden');
+        }
+
+        function closeEditScheduleModal() {
+            document.getElementById('editScheduleModal').classList.add('hidden');
+        }
+
+        // Đóng modal khi click bên ngoài
+        window.onclick = function(event) {
+            const scheduleModal = document.getElementById('scheduleModal');
+            const editScheduleModal = document.getElementById('editScheduleModal');
+            if (event.target == scheduleModal) {
+                closeScheduleModal();
+            }
+            if (event.target == editScheduleModal) {
+                closeEditScheduleModal();
+            }
+        }
+    </script>
 </x-app-layout>

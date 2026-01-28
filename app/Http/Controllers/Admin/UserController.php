@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    // ==================== WEB METHODS ====================
+    
     /**
      * Hiển thị danh sách users
      */
@@ -51,5 +53,74 @@ class UserController extends Controller
         
         return redirect()->route('admin.users.index')
             ->with('success', 'Đã xóa người dùng thành công!');
+    }
+    
+    // ==================== API METHODS ====================
+    
+    /**
+     * API: Get all users
+     */
+    public function apiIndex()
+    {
+        $users = User::where('role', 'user')
+            ->withCount(['pets', 'appointments'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $users
+        ]);
+    }
+
+    /**
+     * API: Get user detail
+     */
+    public function apiShow($id)
+    {
+        $user = User::with(['pets', 'appointments.pet', 'appointments.services'])
+            ->withCount(['pets', 'appointments'])
+            ->find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy người dùng!'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $user
+        ]);
+    }
+
+    /**
+     * API: Delete user
+     */
+    public function apiDestroy($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy người dùng!'
+            ], 404);
+        }
+
+        if ($user->role === 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể xóa tài khoản admin!'
+            ], 400);
+        }
+
+        $user->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Xóa người dùng thành công!'
+        ]);
     }
 }

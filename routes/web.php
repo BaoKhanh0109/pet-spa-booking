@@ -13,7 +13,7 @@ use App\Http\Controllers\GoogleAuthController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/dich-vu', [ServiceController::class, 'index'])->name('client.services');
 Route::get('/dich-vu/{id}', [ServiceController::class, 'show'])->name('services.show');
-Route::post('/dich-vu/tinh-gia', [ServiceController::class, 'calculatePrice'])->name('services.calculate-price')->middleware('auth');
+Route::post('/services/calculate-price', [ServiceController::class, 'calculatePrice'])->name('services.calculate-price');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dat-lich/chon-danh-muc', [BookingController::class, 'selectCategory'])->name('booking.select-category');
@@ -27,9 +27,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dat-lich/trong-giu', [BookingController::class, 'createPetCare'])->name('booking.pet-care');
     Route::post('/dat-lich/trong-giu', [BookingController::class, 'storePetCare'])->name('booking.pet-care.store');
     
-    Route::get('/api/available-staff', [BookingController::class, 'getAvailableStaff'])->name('booking.available-staff');
-    Route::get('/api/doctor-schedule', [BookingController::class, 'getDoctorSchedule'])->name('booking.doctor-schedule');
-    
     Route::get('/dat-lich', [BookingController::class, 'selectCategory'])->name('booking.create');
     Route::post('/dat-lich', [BookingController::class, 'store'])->name('booking.store');
 
@@ -39,6 +36,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/booking/{id}/edit', [BookingController::class, 'edit'])->name('booking.edit');
     Route::put('/booking/{id}', [BookingController::class, 'update'])->name('booking.update');
     Route::delete('/booking/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
+    
+    // AJAX routes cho booking
+    Route::get('/bookings/available-staff', [BookingController::class, 'getAvailableStaff'])->name('bookings.available-staff');
+    Route::get('/bookings/doctor-schedule', [BookingController::class, 'getDoctorSchedule'])->name('bookings.doctor-schedule');
 });
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
@@ -74,8 +75,8 @@ Route::middleware(['auth', 'admin'])
 
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    return redirect()->route('home');
+})->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

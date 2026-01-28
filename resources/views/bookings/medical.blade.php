@@ -361,10 +361,16 @@
                     doctorSchedule.style.display = 'block';
                     scheduleContent.innerHTML = '<div class="text-center text-gray-500">Đang tải lịch...</div>';
 
-                    fetch('{{ route("booking.doctor-schedule") }}?' + new URLSearchParams({
+                    fetch('{{ route("bookings.doctor-schedule") }}?' + new URLSearchParams({
                         employee_id: selectedEmployeeID,
                         month: new Date().toISOString().slice(0, 7)
-                    }))
+                    }), {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        credentials: 'same-origin'
+                    })
                         .then(response => {
                             if (!response.ok) throw new Error('Network response was not ok');
                             return response.json();

@@ -49,14 +49,27 @@
                             {{ $service->description ?? 'Dịch vụ chất lượng cao, thực hiện bởi chuyên viên giàu kinh nghiệm.' }}
                         </p>
 
-                        @auth
-                            <!-- Hiển thị giá cơ bản trước -->
-                            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-lg font-bold text-gray-800">Giá cơ bản:</span>
-                                    <span class="text-3xl font-extrabold text-blue-600">{{ number_format($service->price) }}đ</span>
-                                </div>
+                        <!-- Bảng giá theo Size -->
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">
+                                <i class="fas fa-tags text-blue-600 mr-2"></i>Bảng giá theo kích thước
+                            </h3>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                @foreach($prices as $size => $price)
+                                    <div class="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100 hover:border-blue-300 transition">
+                                        <div class="text-sm font-bold text-gray-600">Size {{ $size }}</div>
+                                        <div class="text-lg font-extrabold text-blue-600">{{ number_format($price) }}đ</div>
+                                    </div>
+                                @endforeach
                             </div>
+                            <p class="text-xs text-gray-500 mt-3 text-center">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Giá được tính dựa trên cân nặng và chiều dài lưng của thú cưng
+                            </p>
+                        </div>
+
+                        @auth
+
                             
                             <!-- Chọn thú cưng để xem giá chính xác -->
                             <div class="bg-white rounded-xl border-2 border-blue-100 p-6">
@@ -114,23 +127,17 @@
                                 @endif
                             </div>
                         @else
-                            <!-- Hiển thị giá cơ bản cho khách chưa đăng nhập -->
-                            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <span class="text-lg font-bold text-gray-800">Giá cơ bản:</span>
-                                    <span class="text-3xl font-extrabold text-blue-600">{{ number_format($service->price) }}đ</span>
-                                </div>
-                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                                    <p class="text-sm text-gray-700">
-                                        <i class="fas fa-info-circle text-yellow-600 mr-2"></i>
-                                        <strong>Đăng nhập</strong> để xem giá chính xác theo size thú cưng của bạn
-                                    </p>
-                                </div>
-                                <a href="{{ route('login') }}" 
-                                    class="block text-center px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-lg">
-                                    <i class="fas fa-sign-in-alt mr-2"></i>Đăng Nhập
-                                </a>
+                            <!-- Nút đăng nhập cho khách chưa đăng nhập -->
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <p class="text-sm text-gray-700">
+                                    <i class="fas fa-info-circle text-yellow-600 mr-2"></i>
+                                    <strong>Đăng nhập</strong> để chọn thú cưng và đặt lịch
+                                </p>
                             </div>
+                            <a href="{{ route('login') }}" 
+                                class="block text-center px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-lg">
+                                <i class="fas fa-sign-in-alt mr-2"></i>Đăng Nhập Để Đặt Lịch
+                            </a>
                         @endauth
                     </div>
                 </div>
@@ -164,16 +171,19 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify({
-                    serviceID: {{ $service->serviceID }},
-                    petID: petID
+                    service_id: {{ $service->serviceID }},
+                    pet_id: petID
                 })
             })
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+            .then(response => {
+                if (response.success) {
+                    const data = response.data;
                     // Hiển thị kết quả
                     document.getElementById('selectedPetName').textContent = data.petName;
                     document.getElementById('selectedPetWeight').textContent = data.weight + ' kg';

@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 
 class GoogleAuthController extends Controller
 {
+    // ==================== WEB METHODS ====================
+    
     /**
      * Redirect to Google authentication page
      */
@@ -57,6 +59,75 @@ class GoogleAuthController extends Controller
         } catch (\Exception $e) {
             \Log::error('Google Login Error: ' . $e->getMessage());
             return redirect('/login')->with('error', 'Đăng nhập Google thất bại: ' . $e->getMessage());
+        }
+    }
+    
+    // ==================== API METHODS ====================
+    
+    /**
+     * API: Get Google OAuth redirect URL
+     */
+    public function apiGetRedirectUrl()
+    {
+        $url = Socialite::driver('google')->stateless()->redirect()->getTargetUrl();
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'url' => $url
+            ],
+            'message' => 'Lấy URL đăng nhập Google thành công'
+        ]);
+    }
+
+    /**
+     * API: Handle Google authentication callback
+     */
+    public function apiHandleCallback(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string',
+        ]);
+
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+            
+            $user = User::where('email', $googleUser->getEmail())->first();
+            
+            if ($user) {
+                if (!$user->google_id) {
+                    $user->google_id = $googleUser->getId();
+                    $user->save();
+                }
+            } else {
+                $user = User::create([
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'google_id' => $googleUser->getId(),
+                    'password' => Hash::make(Str::random(24)),
+                    'role' => 'user',
+                    'phone' => '',
+                    'address' => '',
+                ]);
+            }
+            
+            $token = $user->createToken('google-auth-token')->plainTextToken;
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'user' => $user,
+                    'token' => $token,
+                    'token_type' => 'Bearer',
+                ],
+                'message' => 'Đăng nhập Google thành công!'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đăng nhập Google thất bại: ' . $e->getMessage()
+            ], 401);
         }
     }
 }

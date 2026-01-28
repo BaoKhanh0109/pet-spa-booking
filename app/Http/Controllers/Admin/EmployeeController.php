@@ -225,4 +225,248 @@ class EmployeeController extends Controller
 
         return back()->with('success', 'Xóa lịch làm việc thành công!');
     }
+    
+    // ==================== API METHODS ====================
+    
+    /**
+     * API: Get all employees
+     */
+    public function apiIndex()
+    {
+        $employees = Employee::with(['services', 'role', 'workSchedules'])->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $employees
+        ]);
+    }
+
+    /**
+     * API: Create employee
+     */
+    public function apiStore(Request $request)
+    {
+        $request->validate([
+            'employeeName' => 'required|string|max:100',
+            'roleID' => 'required|exists:employee_roles,roleID',
+            'phoneNumber' => 'required|string|max:20',
+            'email' => 'required|email|max:100',
+            'info' => 'nullable|string',
+            'services' => 'nullable|array',
+            'services.*' => 'exists:services,serviceID'
+        ]);
+
+        $employee = Employee::create($request->except('services'));
+
+        if ($request->has('services')) {
+            $employee->services()->sync($request->services);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Thêm nhân viên thành công!',
+            'data' => $employee->load(['services', 'role'])
+        ], 201);
+    }
+
+    /**
+     * API: Get employee detail
+     */
+    public function apiShow($id)
+    {
+        $employee = Employee::with(['services', 'role', 'workSchedules'])->find($id);
+
+        if (!$employee) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy nhân viên!'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $employee
+        ]);
+    }
+
+    /**
+     * API: Update employee
+     */
+    public function apiUpdate(Request $request, $id)
+    {
+        $employee = Employee::find($id);
+
+        if (!$employee) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy nhân viên!'
+            ], 404);
+        }
+
+        $request->validate([
+            'employeeName' => 'sometimes|string|max:100',
+            'roleID' => 'sometimes|exists:employee_roles,roleID',
+            'phoneNumber' => 'sometimes|string|max:20',
+            'email' => 'sometimes|email|max:100',
+            'info' => 'nullable|string',
+            'services' => 'nullable|array',
+            'services.*' => 'exists:services,serviceID'
+        ]);
+
+        $employee->update($request->except('services'));
+
+        if ($request->has('services')) {
+            $employee->services()->sync($request->services);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật nhân viên thành công!',
+            'data' => $employee->load(['services', 'role'])
+        ]);
+    }
+
+    /**
+     * API: Delete employee
+     */
+    public function apiDestroy($id)
+    {
+        $employee = Employee::find($id);
+
+        if (!$employee) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy nhân viên!'
+            ], 404);
+        }
+
+        if ($employee->avatar && Storage::disk('public')->exists($employee->avatar)) {
+            Storage::disk('public')->delete($employee->avatar);
+        }
+
+        $employee->services()->detach();
+        $employee->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Xóa nhân viên thành công!'
+        ]);
+    }
+
+    /**
+     * API: Add schedule
+     */
+    public function apiStoreSchedule(Request $request, $id)
+    {
+        $employee = Employee::find($id);
+
+        if (!$employee) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy nhân viên!'
+            ], 404);
+        }
+
+        $request->validate([
+            'dayOfWeek' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'startTime' => 'required|date_format:H:i',
+            'endTime' => 'required|date_format:H:i|after:startTime',
+        ]);
+
+        $exists = $employee->workSchedules()
+            ->where('dayOfWeek', $request->dayOfWeek)
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nhân viên đã có lịch làm việc trong ngày này!'
+            ], 400);
+        }
+
+        $schedule = $employee->workSchedules()->create([
+            'dayOfWeek' => $request->dayOfWeek,
+            'startTime' => $request->startTime,
+            'endTime' => $request->endTime,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Thêm lịch làm việc thành công!',
+            'data' => $schedule
+        ], 201);
+    }
+
+    /**
+     * API: Update schedule
+     */
+    public function apiUpdateSchedule(Request $request, $id, $scheduleId)
+    {
+        $employee = Employee::find($id);
+
+        if (!$employee) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy nhân viên!'
+            ], 404);
+        }
+
+        $schedule = $employee->workSchedules()->find($scheduleId);
+
+        if (!$schedule) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy lịch làm việc!'
+            ], 404);
+        }
+
+        $request->validate([
+            'dayOfWeek' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'startTime' => 'required|date_format:H:i',
+            'endTime' => 'required|date_format:H:i|after:startTime',
+        ]);
+
+        $schedule->update([
+            'dayOfWeek' => $request->dayOfWeek,
+            'startTime' => $request->startTime,
+            'endTime' => $request->endTime,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật lịch làm việc thành công!',
+            'data' => $schedule
+        ]);
+    }
+
+    /**
+     * API: Delete schedule
+     */
+    public function apiDestroySchedule($id, $scheduleId)
+    {
+        $employee = Employee::find($id);
+
+        if (!$employee) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy nhân viên!'
+            ], 404);
+        }
+
+        $schedule = $employee->workSchedules()->find($scheduleId);
+
+        if (!$schedule) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy lịch làm việc!'
+            ], 404);
+        }
+
+        $schedule->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Xóa lịch làm việc thành công!'
+        ]);
+    }
 }

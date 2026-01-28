@@ -100,4 +100,115 @@ class EmployeeRoleController extends Controller
         return redirect()->route('admin.roles.index')
             ->with('success', 'Đã xóa chức vụ thành công!');
     }
+    
+    // ==================== API METHODS ====================
+    
+    /**
+     * API: Get all roles
+     */
+    public function apiIndex()
+    {
+        $roles = EmployeeRole::orderBy('roleName')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $roles
+        ]);
+    }
+
+    /**
+     * API: Create role
+     */
+    public function apiStore(Request $request)
+    {
+        $request->validate([
+            'roleName' => 'required|string|max:100|unique:employee_roles,roleName',
+            'description' => 'nullable|string',
+        ]);
+
+        $role = EmployeeRole::create($request->all());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Thêm chức vụ thành công!',
+            'data' => $role
+        ], 201);
+    }
+
+    /**
+     * API: Get role detail
+     */
+    public function apiShow($id)
+    {
+        $role = EmployeeRole::with('employees')->find($id);
+
+        if (!$role) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy chức vụ!'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $role
+        ]);
+    }
+
+    /**
+     * API: Update role
+     */
+    public function apiUpdate(Request $request, $id)
+    {
+        $role = EmployeeRole::find($id);
+
+        if (!$role) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy chức vụ!'
+            ], 404);
+        }
+
+        $request->validate([
+            'roleName' => 'required|string|max:100|unique:employee_roles,roleName,' . $id . ',roleID',
+            'description' => 'nullable|string',
+        ]);
+
+        $role->update($request->all());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật chức vụ thành công!',
+            'data' => $role
+        ]);
+    }
+
+    /**
+     * API: Delete role
+     */
+    public function apiDestroy($id)
+    {
+        $role = EmployeeRole::find($id);
+
+        if (!$role) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy chức vụ!'
+            ], 404);
+        }
+
+        if ($role->employees()->count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể xóa chức vụ này vì đang có nhân viên sử dụng!'
+            ], 400);
+        }
+
+        $role->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Xóa chức vụ thành công!'
+        ]);
+    }
 }

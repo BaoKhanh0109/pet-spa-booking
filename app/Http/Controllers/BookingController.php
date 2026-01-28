@@ -683,4 +683,210 @@ class BookingController extends Controller
         
         return false;
     }
+    
+    // ==================== API METHODS ====================
+    
+    /**
+     * API: Lấy danh sách lịch hẹn của user
+     */
+    public function apiIndex()
+    {
+        $appointments = Appointment::where('userID', Auth::user()->userID)
+            ->with(['pet', 'services.category', 'employee.role'])
+            ->orderBy('appointmentDate', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $appointments
+        ]);
+    }
+
+    /**
+     * API: Lấy chi tiết lịch hẹn
+     */
+    public function apiShow($id)
+    {
+        $appointment = Appointment::with(['pet', 'services.category', 'employee.role'])->find($id);
+
+        if (!$appointment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy lịch hẹn!'
+            ], 404);
+        }
+
+        if ($appointment->userID != Auth::user()->userID) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền truy cập lịch hẹn này!'
+            ], 403);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $appointment
+        ]);
+    }
+
+    /**
+     * API: Tạo lịch hẹn mới
+     */
+    public function apiStore(Request $request)
+    {
+        $request->validate([
+            'pet_id' => 'required|exists:pets,petID',
+            'service_ids' => 'required|array',
+            'service_ids.*' => 'exists:services,serviceID',
+            'appointment_date' => 'required|date|after:now',
+            'employee_id' => 'nullable|exists:employees,employeeID',
+            'end_date' => 'nullable|date|after_or_equal:appointment_date',
+            'note' => 'nullable|string|max:500',
+            'booking_type' => 'required|in:beauty,medical,pet_care',
+        ]);
+
+        $pet = Pet::find($request->pet_id);
+        if ($pet->userID != Auth::user()->userID) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền đặt lịch cho thú cưng này!'
+            ], 403);
+        }
+
+        $totalDuration = Service::whereIn('serviceID', $request->service_ids)->sum('duration');
+
+        if ($this->hasPetTimeConflict($request->pet_id, $request->appointment_date, $totalDuration, $request->end_date)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Thú cưng đã có lịch hẹn vào thời gian này!'
+            ], 400);
+        }
+
+        $employeeID = $request->employee_id;
+        if (!$employeeID && $request->booking_type !== 'pet_care') {
+            $employeeID = $this->autoAssignStaff($request->service_ids, $request->appointment_date);
+            
+            if (!$employeeID) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có nhân viên rảnh vào thời gian này!'
+                ], 400);
+            }
+        }
+
+        $appointment = Appointment::create([
+            'userID' => Auth::user()->userID,
+            'petID' => $request->pet_id,
+            'employeeID' => $employeeID,
+            'appointmentDate' => $request->appointment_date,
+            'endDate' => $request->end_date,
+            'note' => $request->note,
+            'status' => 'Pending',
+        ]);
+
+        $appointment->services()->attach($request->service_ids);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đặt lịch thành công!',
+            'data' => $appointment->load(['pet', 'services.category', 'employee.role'])
+        ], 201);
+    }
+
+    /**
+     * API: Cập nhật lịch hẹn
+     */
+    public function apiUpdate(Request $request, $id)
+    {
+        $appointment = Appointment::find($id);
+
+        if (!$appointment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy lịch hẹn!'
+            ], 404);
+        }
+
+        if ($appointment->userID != Auth::user()->userID) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền sửa lịch hẹn này!'
+            ], 403);
+        }
+
+        if ($appointment->status !== 'Pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chỉ có thể chỉnh sửa lịch hẹn đang chờ phê duyệt!'
+            ], 400);
+        }
+
+        $request->validate([
+            'appointment_date' => 'sometimes|date|after:now',
+            'employee_id' => 'nullable|exists:employees,employeeID',
+            'end_date' => 'nullable|date|after_or_equal:appointment_date',
+            'note' => 'nullable|string|max:500',
+        ]);
+
+        if ($request->has('appointment_date')) {
+            $appointment->appointmentDate = $request->appointment_date;
+        }
+
+        if ($request->has('end_date')) {
+            $appointment->endDate = $request->end_date;
+        }
+
+        if ($request->has('note')) {
+            $appointment->note = $request->note;
+        }
+
+        if ($request->has('employee_id')) {
+            $appointment->employeeID = $request->employee_id;
+        }
+
+        $appointment->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật lịch hẹn thành công!',
+            'data' => $appointment->load(['pet', 'services.category', 'employee.role'])
+        ]);
+    }
+
+    /**
+     * API: Hủy lịch hẹn
+     */
+    public function apiDestroy($id)
+    {
+        $appointment = Appointment::find($id);
+
+        if (!$appointment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy lịch hẹn!'
+            ], 404);
+        }
+
+        if ($appointment->userID != Auth::user()->userID) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền hủy lịch hẹn này!'
+            ], 403);
+        }
+
+        if ($appointment->status === 'Completed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể hủy lịch hẹn đã hoàn thành!'
+            ], 400);
+        }
+
+        $appointment->status = 'Cancelled';
+        $appointment->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Hủy lịch hẹn thành công!'
+        ]);
+    }
 }

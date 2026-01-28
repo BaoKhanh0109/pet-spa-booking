@@ -228,10 +228,16 @@
                     selectedServices.forEach(id => params.append('service_ids[]', id));
                     params.append('appointment_date', dateTime);
 
-                    const url = '{{ route("booking.available-staff") }}?' + params.toString();
+                    const url = '{{ route("bookings.available-staff") }}?' + params.toString();
                     console.log('Fetching:', url);
 
-                    fetch(url)
+                    fetch(url, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        credentials: 'same-origin'
+                    })
                         .then(response => {
                             console.log('Response status:', response.status);
                             return response.json();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EmployeeRole;
 use Illuminate\Http\Request;
+use OpenApi\Annotations as OA;
 
 class EmployeeRoleController extends Controller
 {
@@ -105,6 +106,23 @@ class EmployeeRoleController extends Controller
     
     /**
      * API: Get all roles
+     * 
+     * @OA\Get(
+     *     path="/admin/roles",
+     *     summary="Lấy danh sách chức vụ",
+     *     tags={"Admin Roles"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/EmployeeRole"))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only")
+     * )
      */
     public function apiIndex()
     {
@@ -118,6 +136,33 @@ class EmployeeRoleController extends Controller
 
     /**
      * API: Create role
+     * 
+     * @OA\Post(
+     *     path="/admin/roles",
+     *     summary="Thêm chức vụ mới",
+     *     tags={"Admin Roles"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"roleName"},
+     *             @OA\Property(property="roleName", type="string", example="Bác sĩ thú y"),
+     *             @OA\Property(property="description", type="string", example="Nhân viên khám chữa bệnh cho thú cưng")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Thêm thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", ref="#/components/schemas/EmployeeRole")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=422, description="Validation Error")
+     * )
      */
     public function apiStore(Request $request)
     {
@@ -137,6 +182,31 @@ class EmployeeRoleController extends Controller
 
     /**
      * API: Get role detail
+     * 
+     * @OA\Get(
+     *     path="/admin/roles/{id}",
+     *     summary="Lấy chi tiết chức vụ",
+     *     tags={"Admin Roles"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID chức vụ",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/EmployeeRole")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiShow($id)
     {
@@ -157,6 +227,40 @@ class EmployeeRoleController extends Controller
 
     /**
      * API: Update role
+     * 
+     * @OA\Put(
+     *     path="/admin/roles/{id}",
+     *     summary="Cập nhật chức vụ",
+     *     tags={"Admin Roles"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID chức vụ",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"roleName"},
+     *             @OA\Property(property="roleName", type="string"),
+     *             @OA\Property(property="description", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", ref="#/components/schemas/EmployeeRole")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiUpdate(Request $request, $id)
     {
@@ -185,6 +289,32 @@ class EmployeeRoleController extends Controller
 
     /**
      * API: Delete role
+     * 
+     * @OA\Delete(
+     *     path="/admin/roles/{id}",
+     *     summary="Xóa chức vụ",
+     *     tags={"Admin Roles"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID chức vụ",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Xóa thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Không thể xóa - đang có nhân viên sử dụng"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiDestroy($id)
     {

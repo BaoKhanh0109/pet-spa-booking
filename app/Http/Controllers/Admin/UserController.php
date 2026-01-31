@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use OpenApi\Annotations as OA;
 
 class UserController extends Controller
 {
@@ -59,6 +60,23 @@ class UserController extends Controller
     
     /**
      * API: Get all users
+     * 
+     * @OA\Get(
+     *     path="/admin/users",
+     *     summary="Lấy danh sách người dùng",
+     *     tags={"Admin Users"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/User"))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only")
+     * )
      */
     public function apiIndex()
     {
@@ -75,6 +93,31 @@ class UserController extends Controller
 
     /**
      * API: Get user detail
+     * 
+     * @OA\Get(
+     *     path="/admin/users/{id}",
+     *     summary="Lấy chi tiết người dùng",
+     *     tags={"Admin Users"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID người dùng",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiShow($id)
     {
@@ -97,6 +140,32 @@ class UserController extends Controller
 
     /**
      * API: Delete user
+     * 
+     * @OA\Delete(
+     *     path="/admin/users/{id}",
+     *     summary="Xóa người dùng",
+     *     tags={"Admin Users"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID người dùng",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Xóa thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Không thể xóa tài khoản admin"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiDestroy($id)
     {

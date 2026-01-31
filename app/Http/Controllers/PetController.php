@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Pet;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use OpenApi\Annotations as OA;
 
 class PetController extends Controller
 {
@@ -95,6 +96,22 @@ class PetController extends Controller
     
     /**
      * API: Lấy danh sách thú cưng
+     * 
+     * @OA\Get(
+     *     path="/pets",
+     *     summary="Lấy danh sách thú cưng của user",
+     *     tags={"Pets"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Pet"))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
      */
     public function apiIndex()
     {
@@ -108,6 +125,41 @@ class PetController extends Controller
 
     /**
      * API: Thêm thú cưng mới
+     * 
+     * @OA\Post(
+     *     path="/pets",
+     *     summary="Thêm thú cưng mới",
+     *     tags={"Pets"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"petName", "species"},
+     *                 @OA\Property(property="petName", type="string", example="Lucky"),
+     *                 @OA\Property(property="species", type="string", example="Chó"),
+     *                 @OA\Property(property="breed", type="string", example="Golden Retriever"),
+     *                 @OA\Property(property="weight", type="number", example=15.5),
+     *                 @OA\Property(property="backLength", type="number", example=50),
+     *                 @OA\Property(property="birthDate", type="string", format="date", example="2022-01-15"),
+     *                 @OA\Property(property="gender", type="string", enum={"male", "female"}),
+     *                 @OA\Property(property="petImage", type="string", format="binary")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Thêm thú cưng thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Thêm thú cưng thành công!"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Pet")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=422, description="Validation Error")
+     * )
      */
     public function apiStore(Request $request)
     {
@@ -141,6 +193,31 @@ class PetController extends Controller
 
     /**
      * API: Lấy chi tiết thú cưng
+     * 
+     * @OA\Get(
+     *     path="/pets/{id}",
+     *     summary="Lấy chi tiết thú cưng",
+     *     tags={"Pets"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID thú cưng",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/Pet")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiShow($id)
     {
@@ -168,6 +245,44 @@ class PetController extends Controller
 
     /**
      * API: Cập nhật thú cưng
+     * 
+     * @OA\Put(
+     *     path="/pets/{id}",
+     *     summary="Cập nhật thú cưng",
+     *     tags={"Pets"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID thú cưng",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="petName", type="string", example="Lucky"),
+     *             @OA\Property(property="species", type="string", example="Chó"),
+     *             @OA\Property(property="breed", type="string", example="Golden Retriever"),
+     *             @OA\Property(property="weight", type="number", example=15.5),
+     *             @OA\Property(property="backLength", type="number", example=50),
+     *             @OA\Property(property="birthDate", type="string", format="date"),
+     *             @OA\Property(property="gender", type="string", enum={"male", "female"})
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Cập nhật thú cưng thành công!"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Pet")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiUpdate(Request $request, $id)
     {
@@ -218,6 +333,32 @@ class PetController extends Controller
 
     /**
      * API: Xóa thú cưng
+     * 
+     * @OA\Delete(
+     *     path="/pets/{id}",
+     *     summary="Xóa thú cưng",
+     *     tags={"Pets"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID thú cưng",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Xóa thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Xóa thú cưng thành công!")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Không thể xóa - thú cưng có lịch hẹn"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiDestroy($id)
     {

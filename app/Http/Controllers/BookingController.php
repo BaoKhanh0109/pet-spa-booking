@@ -11,6 +11,7 @@ use App\Models\WorkSchedule;
 use App\Helpers\PricingHelper;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use OpenApi\Annotations as OA;
 
 class BookingController extends Controller
 {
@@ -23,7 +24,16 @@ class BookingController extends Controller
     }
     
     public function selectCategory() {
-        $pets = Pet::where('userID', Auth::user()->userID)->get();
+        // Lấy danh sách petID đang có lịch hẹn hoạt động (không bị hủy)
+        $petsWithActiveAppointments = Appointment::where('userID', Auth::user()->userID)
+            ->whereNotIn('status', ['canceled', 'Canceled', 'completed', 'Completed'])
+            ->pluck('petID')
+            ->toArray();
+        
+        // Lọc ra những pet chưa có lịch hẹn
+        $pets = Pet::where('userID', Auth::user()->userID)
+            ->whereNotIn('petID', $petsWithActiveAppointments)
+            ->get();
         $categories = \App\Models\ServiceCategory::all();
         
         return view('bookings.select-category', compact('pets', 'categories'));
@@ -78,6 +88,42 @@ class BookingController extends Controller
         return view('bookings.pet-care', compact('service', 'pet'));
     }
 
+    /**
+     * @OA\Get(
+     *     path="/bookings-available-staff",
+     *     summary="Lấy danh sách nhân viên có sẵn",
+     *     tags={"Bookings"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="service_ids[]",
+     *         in="query",
+     *         description="Mảng ID dịch vụ",
+     *         required=true,
+     *         @OA\Schema(type="array", @OA\Items(type="integer"))
+     *     ),
+     *     @OA\Parameter(
+     *         name="appointment_date",
+     *         in="query",
+     *         description="Ngày giờ hẹn",
+     *         required=true,
+     *         @OA\Schema(type="string", format="date-time")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 type="object",
+     *                 @OA\Property(property="employeeID", type="integer"),
+     *                 @OA\Property(property="employeeName", type="string"),
+     *                 @OA\Property(property="role", type="string")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
     public function getAvailableStaff(Request $request) {
         $serviceIds = $request->get('service_ids', []);
         $appointmentDate = $request->get('appointment_date');
@@ -112,6 +158,37 @@ class BookingController extends Controller
         return response()->json($availableStaff);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/bookings-doctor-schedule",
+     *     summary="Lấy lịch làm việc bác sĩ",
+     *     tags={"Bookings"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="employee_id",
+     *         in="query",
+     *         description="ID nhân viên/bác sĩ",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="month",
+     *         in="query",
+     *         description="Tháng (format: Y-m)",
+     *         required=false,
+     *         @OA\Schema(type="string", example="2026-02")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="schedules", type="array", @OA\Items(ref="#/components/schemas/WorkSchedule")),
+     *             @OA\Property(property="appointments", type="array", @OA\Items(ref="#/components/schemas/Appointment"))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
+     */
     public function getDoctorSchedule(Request $request) {
         try {
             $employeeID = $request->get('employee_id');
@@ -688,6 +765,22 @@ class BookingController extends Controller
     
     /**
      * API: Lấy danh sách lịch hẹn của user
+     * 
+     * @OA\Get(
+     *     path="/bookings",
+     *     summary="Lấy danh sách lịch hẹn của user",
+     *     tags={"Bookings"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Appointment"))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized")
+     * )
      */
     public function apiIndex()
     {
@@ -704,6 +797,31 @@ class BookingController extends Controller
 
     /**
      * API: Lấy chi tiết lịch hẹn
+     * 
+     * @OA\Get(
+     *     path="/bookings/{id}",
+     *     summary="Lấy chi tiết lịch hẹn",
+     *     tags={"Bookings"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID lịch hẹn",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/Appointment")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiShow($id)
     {
@@ -731,6 +849,38 @@ class BookingController extends Controller
 
     /**
      * API: Tạo lịch hẹn mới
+     * 
+     * @OA\Post(
+     *     path="/bookings",
+     *     summary="Tạo lịch hẹn mới",
+     *     tags={"Bookings"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"pet_id", "service_ids", "appointment_date", "booking_type"},
+     *             @OA\Property(property="pet_id", type="integer", example=1),
+     *             @OA\Property(property="service_ids", type="array", @OA\Items(type="integer"), example={1, 2}),
+     *             @OA\Property(property="appointment_date", type="string", format="date-time", example="2026-02-01 10:00:00"),
+     *             @OA\Property(property="employee_id", type="integer", nullable=true),
+     *             @OA\Property(property="end_date", type="string", format="date-time", nullable=true),
+     *             @OA\Property(property="note", type="string", example="Ghi chú"),
+     *             @OA\Property(property="booking_type", type="string", enum={"beauty", "medical", "pet_care"})
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Đặt lịch thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Đặt lịch thành công!"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Appointment")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Lỗi validation hoặc xung đột thời gian"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function apiStore(Request $request)
     {
@@ -795,6 +945,42 @@ class BookingController extends Controller
 
     /**
      * API: Cập nhật lịch hẹn
+     * 
+     * @OA\Put(
+     *     path="/bookings/{id}",
+     *     summary="Cập nhật lịch hẹn",
+     *     tags={"Bookings"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID lịch hẹn",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="appointment_date", type="string", format="date-time"),
+     *             @OA\Property(property="employee_id", type="integer", nullable=true),
+     *             @OA\Property(property="end_date", type="string", format="date-time", nullable=true),
+     *             @OA\Property(property="note", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Cập nhật lịch hẹn thành công!"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Appointment")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Chỉ có thể sửa lịch hẹn Pending"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiUpdate(Request $request, $id)
     {
@@ -855,6 +1041,32 @@ class BookingController extends Controller
 
     /**
      * API: Hủy lịch hẹn
+     * 
+     * @OA\Delete(
+     *     path="/bookings/{id}",
+     *     summary="Hủy lịch hẹn",
+     *     tags={"Bookings"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID lịch hẹn",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Hủy thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Hủy lịch hẹn thành công!")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Không thể hủy lịch hẹn đã hoàn thành"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiDestroy($id)
     {

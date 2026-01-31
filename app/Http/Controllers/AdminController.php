@@ -8,6 +8,7 @@ use App\Models\Appointment;
 use App\Models\User;
 use App\Models\Pet;
 use App\Models\Employee;
+use OpenApi\Annotations as OA;
 
 class AdminController extends Controller
 {
@@ -54,6 +55,41 @@ class AdminController extends Controller
     
     /**
      * API: Dashboard statistics
+     * 
+     * @OA\Get(
+     *     path="/admin/dashboard",
+     *     summary="Thống kê tổng quan dashboard",
+     *     tags={"Admin Dashboard"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="stats",
+     *                     type="object",
+     *                     @OA\Property(property="total_services", type="integer"),
+     *                     @OA\Property(property="total_appointments", type="integer"),
+     *                     @OA\Property(property="total_users", type="integer"),
+     *                     @OA\Property(property="total_pets", type="integer"),
+     *                     @OA\Property(property="total_employees", type="integer"),
+     *                     @OA\Property(property="pending_appointments", type="integer"),
+     *                     @OA\Property(property="confirmed_appointments", type="integer"),
+     *                     @OA\Property(property="completed_appointments", type="integer"),
+     *                     @OA\Property(property="cancelled_appointments", type="integer")
+     *                 ),
+     *                 @OA\Property(property="recent_appointments", type="array", @OA\Items(ref="#/components/schemas/Appointment")),
+     *                 @OA\Property(property="today_appointments", type="array", @OA\Items(ref="#/components/schemas/Appointment"))
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only")
+     * )
      */
     public function apiDashboard()
     {
@@ -92,6 +128,44 @@ class AdminController extends Controller
 
     /**
      * API: Revenue statistics
+     * 
+     * @OA\Get(
+     *     path="/admin/dashboard/revenue",
+     *     summary="Thống kê doanh thu",
+     *     tags={"Admin Dashboard"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="start_date",
+     *         in="query",
+     *         description="Ngày bắt đầu",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="end_date",
+     *         in="query",
+     *         description="Ngày kết thúc",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="start_date", type="string", format="date"),
+     *                 @OA\Property(property="end_date", type="string", format="date"),
+     *                 @OA\Property(property="total_appointments", type="integer"),
+     *                 @OA\Property(property="total_revenue", type="number")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only")
+     * )
      */
     public function apiRevenue(Request $request)
     {
@@ -122,6 +196,23 @@ class AdminController extends Controller
     
     /**
      * API: Get all appointments
+     * 
+     * @OA\Get(
+     *     path="/admin/appointments",
+     *     summary="Lấy danh sách tất cả lịch hẹn",
+     *     tags={"Admin Appointments"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Appointment"))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only")
+     * )
      */
     public function apiAppointments()
     {
@@ -137,6 +228,31 @@ class AdminController extends Controller
     
     /**
      * API: Get appointment detail
+     * 
+     * @OA\Get(
+     *     path="/admin/appointments/{id}",
+     *     summary="Lấy chi tiết lịch hẹn",
+     *     tags={"Admin Appointments"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID lịch hẹn",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/Appointment")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiAppointmentShow($id)
     {
@@ -157,6 +273,39 @@ class AdminController extends Controller
 
     /**
      * API: Update appointment status
+     * 
+     * @OA\Patch(
+     *     path="/admin/appointments/{id}/status",
+     *     summary="Cập nhật trạng thái lịch hẹn",
+     *     tags={"Admin Appointments"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID lịch hẹn",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"status"},
+     *             @OA\Property(property="status", type="string", enum={"Pending", "Confirmed", "Completed", "Cancelled"})
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/Appointment"),
+     *             @OA\Property(property="message", type="string", example="Cập nhật trạng thái thành công!")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiUpdateStatus(Request $request, $id)
     {
@@ -185,6 +334,31 @@ class AdminController extends Controller
 
     /**
      * API: Delete appointment
+     * 
+     * @OA\Delete(
+     *     path="/admin/appointments/{id}",
+     *     summary="Xóa lịch hẹn",
+     *     tags={"Admin Appointments"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID lịch hẹn",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Xóa thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Xóa lịch hẹn thành công!")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiDeleteAppointment($id)
     {

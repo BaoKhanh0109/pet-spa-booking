@@ -6,6 +6,7 @@ use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use OpenApi\Annotations as OA;
 
 class AdminServiceController extends Controller
 {
@@ -110,6 +111,37 @@ class AdminServiceController extends Controller
     
     /**
      * API: Get all services
+     * 
+     * @OA\Get(
+     *     path="/admin/services",
+     *     summary="Lấy danh sách dịch vụ (Admin)",
+     *     tags={"Admin Services"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Tìm kiếm theo tên dịch vụ",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="category_id",
+     *         in="query",
+     *         description="Lọc theo danh mục",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Service"))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only")
+     * )
      */
     public function apiIndex(Request $request)
     {
@@ -134,6 +166,36 @@ class AdminServiceController extends Controller
 
     /**
      * API: Create service
+     * 
+     * @OA\Post(
+     *     path="/admin/services",
+     *     summary="Thêm dịch vụ mới",
+     *     tags={"Admin Services"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"serviceName", "categoryID", "price"},
+     *             @OA\Property(property="serviceName", type="string", example="Tắm và sấy khô"),
+     *             @OA\Property(property="categoryID", type="integer", example=1),
+     *             @OA\Property(property="price", type="number", example=150000),
+     *             @OA\Property(property="duration", type="integer", example=60),
+     *             @OA\Property(property="description", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Thêm thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Service")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=422, description="Validation Error")
+     * )
      */
     public function apiStore(Request $request)
     {
@@ -156,6 +218,31 @@ class AdminServiceController extends Controller
 
     /**
      * API: Get service detail
+     * 
+     * @OA\Get(
+     *     path="/admin/services/{id}",
+     *     summary="Lấy chi tiết dịch vụ",
+     *     tags={"Admin Services"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID dịch vụ",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/Service")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiShow($id)
     {
@@ -176,6 +263,42 @@ class AdminServiceController extends Controller
 
     /**
      * API: Update service
+     * 
+     * @OA\Put(
+     *     path="/admin/services/{id}",
+     *     summary="Cập nhật dịch vụ",
+     *     tags={"Admin Services"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID dịch vụ",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="serviceName", type="string"),
+     *             @OA\Property(property="categoryID", type="integer"),
+     *             @OA\Property(property="price", type="number"),
+     *             @OA\Property(property="duration", type="integer"),
+     *             @OA\Property(property="description", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Service")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiUpdate(Request $request, $id)
     {
@@ -207,6 +330,31 @@ class AdminServiceController extends Controller
 
     /**
      * API: Delete service
+     * 
+     * @OA\Delete(
+     *     path="/admin/services/{id}",
+     *     summary="Xóa dịch vụ",
+     *     tags={"Admin Services"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID dịch vụ",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Xóa thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiDestroy($id)
     {

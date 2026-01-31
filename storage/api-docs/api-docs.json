@@ -1,0 +1,1226 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Pet Spa Booking API Documentation",
+    "description": "RESTful API cho hệ thống đặt lịch Pet Spa",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Pet Spa Support",
+      "email": "admin@petspa.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Pet Spa Booking API Server"
+    }
+  ],
+  "tags": [
+    {"name": "Authentication", "description": "API đăng nhập, đăng ký, đăng xuất"},
+    {"name": "Google Auth", "description": "API xác thực với Google"},
+    {"name": "Home", "description": "API trang chủ và tìm kiếm công khai"},
+    {"name": "Services", "description": "API quản lý dịch vụ (public)"},
+    {"name": "Profile", "description": "API quản lý thông tin cá nhân"},
+    {"name": "Pets", "description": "API quản lý thú cưng"},
+    {"name": "Bookings", "description": "API quản lý lịch hẹn"},
+    {"name": "Admin Dashboard", "description": "API thống kê dashboard (Admin)"},
+    {"name": "Admin Services", "description": "API quản lý dịch vụ (Admin)"},
+    {"name": "Admin Employees", "description": "API quản lý nhân viên (Admin)"},
+    {"name": "Admin Appointments", "description": "API quản lý lịch hẹn (Admin)"},
+    {"name": "Admin Users", "description": "API quản lý người dùng (Admin)"},
+    {"name": "Admin Roles", "description": "API quản lý chức vụ nhân viên (Admin)"}
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your Bearer token"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "userID": {"type": "integer", "example": 1},
+          "name": {"type": "string", "example": "Nguyễn Văn A"},
+          "email": {"type": "string", "example": "user@example.com"},
+          "phone": {"type": "string", "example": "0123456789"},
+          "address": {"type": "string", "example": "123 Đường ABC"},
+          "role": {"type": "string", "example": "user"},
+          "created_at": {"type": "string", "format": "date-time"}
+        }
+      },
+      "Pet": {
+        "type": "object",
+        "properties": {
+          "petID": {"type": "integer", "example": 1},
+          "userID": {"type": "integer", "example": 1},
+          "petName": {"type": "string", "example": "Lucky"},
+          "species": {"type": "string", "example": "Chó"},
+          "breed": {"type": "string", "example": "Golden Retriever"},
+          "weight": {"type": "number", "example": 15.5},
+          "backLength": {"type": "number", "example": 50},
+          "birthDate": {"type": "string", "format": "date", "example": "2022-01-15"},
+          "gender": {"type": "string", "enum": ["male", "female"]},
+          "petImage": {"type": "string", "example": "pets/image.jpg"}
+        }
+      },
+      "Service": {
+        "type": "object",
+        "properties": {
+          "serviceID": {"type": "integer", "example": 1},
+          "serviceName": {"type": "string", "example": "Tắm và sấy khô"},
+          "description": {"type": "string", "example": "Dịch vụ tắm spa cao cấp"},
+          "price": {"type": "number", "example": 150000},
+          "duration": {"type": "integer", "example": 60},
+          "categoryID": {"type": "integer", "example": 1},
+          "image": {"type": "string", "example": "services/image.jpg"}
+        }
+      },
+      "ServiceCategory": {
+        "type": "object",
+        "properties": {
+          "categoryID": {"type": "integer", "example": 1},
+          "categoryName": {"type": "string", "example": "Làm đẹp"},
+          "description": {"type": "string", "example": "Các dịch vụ làm đẹp cho thú cưng"}
+        }
+      },
+      "Appointment": {
+        "type": "object",
+        "properties": {
+          "appointmentID": {"type": "integer", "example": 1},
+          "userID": {"type": "integer", "example": 1},
+          "petID": {"type": "integer", "example": 1},
+          "employeeID": {"type": "integer", "example": 1},
+          "appointmentDate": {"type": "string", "format": "date-time"},
+          "endDate": {"type": "string", "format": "date-time", "nullable": true},
+          "note": {"type": "string", "example": "Ghi chú"},
+          "status": {"type": "string", "enum": ["Pending", "Confirmed", "Completed", "Cancelled"]}
+        }
+      },
+      "Employee": {
+        "type": "object",
+        "properties": {
+          "employeeID": {"type": "integer", "example": 1},
+          "employeeName": {"type": "string", "example": "Trần Văn B"},
+          "email": {"type": "string", "example": "employee@petspa.com"},
+          "phone": {"type": "string", "example": "0987654321"},
+          "roleID": {"type": "integer", "example": 1}
+        }
+      },
+      "EmployeeRole": {
+        "type": "object",
+        "properties": {
+          "roleID": {"type": "integer", "example": 1},
+          "roleName": {"type": "string", "example": "Bác sĩ thú y"},
+          "description": {"type": "string", "example": "Nhân viên khám chữa bệnh cho thú cưng"}
+        }
+      },
+      "WorkSchedule": {
+        "type": "object",
+        "properties": {
+          "scheduleID": {"type": "integer", "example": 1},
+          "employeeID": {"type": "integer", "example": 1},
+          "dayOfWeek": {"type": "string", "example": "Monday"},
+          "startTime": {"type": "string", "format": "time", "example": "08:00:00"},
+          "endTime": {"type": "string", "format": "time", "example": "17:00:00"}
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Đăng ký tài khoản mới",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "password", "password_confirmation"],
+                "properties": {
+                  "name": {"type": "string", "example": "Nguyễn Văn A"},
+                  "email": {"type": "string", "format": "email", "example": "user@example.com"},
+                  "password": {"type": "string", "format": "password", "example": "password123"},
+                  "password_confirmation": {"type": "string", "format": "password", "example": "password123"},
+                  "phone": {"type": "string", "example": "0123456789"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Đăng ký thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean", "example": true},
+                    "message": {"type": "string", "example": "Đăng ký thành công!"},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {"$ref": "#/components/schemas/User"},
+                        "access_token": {"type": "string", "example": "1|abc123..."},
+                        "token_type": {"type": "string", "example": "Bearer"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {"description": "Validation Error"}
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Đăng nhập",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {"type": "string", "format": "email", "example": "user@example.com"},
+                  "password": {"type": "string", "format": "password", "example": "password123"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đăng nhập thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean", "example": true},
+                    "message": {"type": "string", "example": "Đăng nhập thành công!"},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {"$ref": "#/components/schemas/User"},
+                        "access_token": {"type": "string"},
+                        "token_type": {"type": "string", "example": "Bearer"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {"description": "Validation Error"}
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Đăng xuất",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Đăng xuất thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean", "example": true},
+                    "message": {"type": "string", "example": "Đăng xuất thành công!"}
+                  }
+                }
+              }
+            }
+          },
+          "401": {"description": "Unauthorized"}
+        }
+      }
+    },
+    "/auth/user": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Lấy thông tin user hiện tại",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean", "example": true},
+                    "data": {"$ref": "#/components/schemas/User"}
+                  }
+                }
+              }
+            }
+          },
+          "401": {"description": "Unauthorized"}
+        }
+      }
+    },
+    "/auth/google/url": {
+      "get": {
+        "tags": ["Google Auth"],
+        "summary": "Lấy URL đăng nhập Google",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean", "example": true},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "url": {"type": "string", "example": "https://accounts.google.com/o/oauth2/..."}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/google/callback": {
+      "post": {
+        "tags": ["Google Auth"],
+        "summary": "Xử lý callback từ Google",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["code"],
+                "properties": {
+                  "code": {"type": "string", "description": "Authorization code từ Google"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Đăng nhập thành công"},
+          "401": {"description": "Đăng nhập Google thất bại"}
+        }
+      }
+    },
+    "/home": {
+      "get": {
+        "tags": ["Home"],
+        "summary": "Lấy dữ liệu trang chủ",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean", "example": true},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "services": {"type": "array", "items": {"$ref": "#/components/schemas/Service"}},
+                        "categories": {"type": "array", "items": {"$ref": "#/components/schemas/ServiceCategory"}},
+                        "featured_services": {"type": "array", "items": {"$ref": "#/components/schemas/Service"}}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/home/search": {
+      "get": {
+        "tags": ["Home"],
+        "summary": "Tìm kiếm dịch vụ",
+        "parameters": [
+          {"name": "q", "in": "query", "description": "Từ khóa tìm kiếm", "schema": {"type": "string"}}
+        ],
+        "responses": {
+          "200": {"description": "Thành công"}
+        }
+      }
+    },
+    "/services": {
+      "get": {
+        "tags": ["Services"],
+        "summary": "Lấy danh sách dịch vụ",
+        "parameters": [
+          {"name": "search", "in": "query", "description": "Tìm kiếm theo tên hoặc mô tả", "schema": {"type": "string"}},
+          {"name": "category_id", "in": "query", "description": "Lọc theo danh mục", "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean", "example": true},
+                    "data": {"type": "array", "items": {"$ref": "#/components/schemas/Service"}}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/{id}": {
+      "get": {
+        "tags": ["Services"],
+        "summary": "Lấy chi tiết dịch vụ",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "description": "ID dịch vụ", "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      }
+    },
+    "/service-categories": {
+      "get": {
+        "tags": ["Services"],
+        "summary": "Lấy danh sách danh mục dịch vụ",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean", "example": true},
+                    "data": {"type": "array", "items": {"$ref": "#/components/schemas/ServiceCategory"}}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/calculate-price": {
+      "post": {
+        "tags": ["Services"],
+        "summary": "Tính giá dịch vụ theo thú cưng",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["service_id", "pet_id"],
+                "properties": {
+                  "service_id": {"type": "integer", "example": 1},
+                  "pet_id": {"type": "integer", "example": 1}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Tính giá thành công"},
+          "401": {"description": "Unauthorized"}
+        }
+      }
+    },
+    "/profile": {
+      "get": {
+        "tags": ["Profile"],
+        "summary": "Lấy thông tin profile",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"}
+        }
+      },
+      "put": {
+        "tags": ["Profile"],
+        "summary": "Cập nhật thông tin profile",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email"],
+                "properties": {
+                  "name": {"type": "string", "example": "Nguyễn Văn A"},
+                  "email": {"type": "string", "format": "email"},
+                  "phone": {"type": "string"},
+                  "address": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Cập nhật thành công"},
+          "401": {"description": "Unauthorized"}
+        }
+      },
+      "delete": {
+        "tags": ["Profile"],
+        "summary": "Xóa tài khoản",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["password"],
+                "properties": {
+                  "password": {"type": "string", "format": "password"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Xóa thành công"},
+          "401": {"description": "Unauthorized"}
+        }
+      }
+    },
+    "/profile/password": {
+      "put": {
+        "tags": ["Profile"],
+        "summary": "Đổi mật khẩu",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["current_password", "password", "password_confirmation"],
+                "properties": {
+                  "current_password": {"type": "string", "format": "password"},
+                  "password": {"type": "string", "format": "password"},
+                  "password_confirmation": {"type": "string", "format": "password"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Đổi mật khẩu thành công"},
+          "401": {"description": "Unauthorized"}
+        }
+      }
+    },
+    "/pets": {
+      "get": {
+        "tags": ["Pets"],
+        "summary": "Lấy danh sách thú cưng của user",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean", "example": true},
+                    "data": {"type": "array", "items": {"$ref": "#/components/schemas/Pet"}}
+                  }
+                }
+              }
+            }
+          },
+          "401": {"description": "Unauthorized"}
+        }
+      },
+      "post": {
+        "tags": ["Pets"],
+        "summary": "Thêm thú cưng mới",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["petName", "species"],
+                "properties": {
+                  "petName": {"type": "string", "example": "Lucky"},
+                  "species": {"type": "string", "example": "Chó"},
+                  "breed": {"type": "string", "example": "Golden Retriever"},
+                  "weight": {"type": "number", "example": 15.5},
+                  "backLength": {"type": "number", "example": 50},
+                  "birthDate": {"type": "string", "format": "date"},
+                  "gender": {"type": "string", "enum": ["male", "female"]},
+                  "petImage": {"type": "string", "format": "binary"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {"description": "Thêm thú cưng thành công"},
+          "401": {"description": "Unauthorized"}
+        }
+      }
+    },
+    "/pets/{id}": {
+      "get": {
+        "tags": ["Pets"],
+        "summary": "Lấy chi tiết thú cưng",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "put": {
+        "tags": ["Pets"],
+        "summary": "Cập nhật thú cưng",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/Pet"}
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Cập nhật thành công"},
+          "401": {"description": "Unauthorized"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "delete": {
+        "tags": ["Pets"],
+        "summary": "Xóa thú cưng",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {"description": "Xóa thành công"},
+          "400": {"description": "Không thể xóa - thú cưng có lịch hẹn"},
+          "401": {"description": "Unauthorized"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      }
+    },
+    "/bookings": {
+      "get": {
+        "tags": ["Bookings"],
+        "summary": "Lấy danh sách lịch hẹn của user",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean", "example": true},
+                    "data": {"type": "array", "items": {"$ref": "#/components/schemas/Appointment"}}
+                  }
+                }
+              }
+            }
+          },
+          "401": {"description": "Unauthorized"}
+        }
+      },
+      "post": {
+        "tags": ["Bookings"],
+        "summary": "Tạo lịch hẹn mới",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["pet_id", "service_ids", "appointment_date", "booking_type"],
+                "properties": {
+                  "pet_id": {"type": "integer", "example": 1},
+                  "service_ids": {"type": "array", "items": {"type": "integer"}, "example": [1, 2]},
+                  "appointment_date": {"type": "string", "format": "date-time", "example": "2026-02-01 10:00:00"},
+                  "employee_id": {"type": "integer", "nullable": true},
+                  "end_date": {"type": "string", "format": "date-time", "nullable": true},
+                  "note": {"type": "string", "example": "Ghi chú"},
+                  "booking_type": {"type": "string", "enum": ["beauty", "medical", "pet_care"]}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {"description": "Đặt lịch thành công"},
+          "400": {"description": "Lỗi validation hoặc xung đột thời gian"},
+          "401": {"description": "Unauthorized"}
+        }
+      }
+    },
+    "/bookings/{id}": {
+      "get": {
+        "tags": ["Bookings"],
+        "summary": "Lấy chi tiết lịch hẹn",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "put": {
+        "tags": ["Bookings"],
+        "summary": "Cập nhật lịch hẹn",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "appointment_date": {"type": "string", "format": "date-time"},
+                  "employee_id": {"type": "integer"},
+                  "end_date": {"type": "string", "format": "date-time"},
+                  "note": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Cập nhật thành công"},
+          "400": {"description": "Chỉ có thể sửa lịch hẹn Pending"},
+          "401": {"description": "Unauthorized"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "delete": {
+        "tags": ["Bookings"],
+        "summary": "Hủy lịch hẹn",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {"description": "Hủy thành công"},
+          "400": {"description": "Không thể hủy lịch hẹn đã hoàn thành"},
+          "401": {"description": "Unauthorized"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      }
+    },
+    "/bookings-available-staff": {
+      "get": {
+        "tags": ["Bookings"],
+        "summary": "Lấy danh sách nhân viên có sẵn",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "service_ids[]", "in": "query", "required": true, "schema": {"type": "array", "items": {"type": "integer"}}},
+          {"name": "appointment_date", "in": "query", "required": true, "schema": {"type": "string", "format": "date-time"}}
+        ],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"}
+        }
+      }
+    },
+    "/bookings-doctor-schedule": {
+      "get": {
+        "tags": ["Bookings"],
+        "summary": "Lấy lịch làm việc bác sĩ",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "employee_id", "in": "query", "required": true, "schema": {"type": "integer"}},
+          {"name": "month", "in": "query", "schema": {"type": "string", "example": "2026-02"}}
+        ],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"}
+        }
+      }
+    },
+    "/admin/dashboard": {
+      "get": {
+        "tags": ["Admin Dashboard"],
+        "summary": "Thống kê tổng quan dashboard",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden - Admin only"}
+        }
+      }
+    },
+    "/admin/dashboard/revenue": {
+      "get": {
+        "tags": ["Admin Dashboard"],
+        "summary": "Thống kê doanh thu",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "start_date", "in": "query", "schema": {"type": "string", "format": "date"}},
+          {"name": "end_date", "in": "query", "schema": {"type": "string", "format": "date"}}
+        ],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden - Admin only"}
+        }
+      }
+    },
+    "/admin/services": {
+      "get": {
+        "tags": ["Admin Services"],
+        "summary": "Lấy danh sách dịch vụ (Admin)",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "search", "in": "query", "schema": {"type": "string"}},
+          {"name": "category_id", "in": "query", "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden - Admin only"}
+        }
+      },
+      "post": {
+        "tags": ["Admin Services"],
+        "summary": "Thêm dịch vụ mới",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["serviceName", "categoryID", "price"],
+                "properties": {
+                  "serviceName": {"type": "string"},
+                  "categoryID": {"type": "integer"},
+                  "price": {"type": "number"},
+                  "duration": {"type": "integer"},
+                  "description": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {"description": "Thêm thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden - Admin only"}
+        }
+      }
+    },
+    "/admin/services/{id}": {
+      "get": {
+        "tags": ["Admin Services"],
+        "summary": "Lấy chi tiết dịch vụ",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "put": {
+        "tags": ["Admin Services"],
+        "summary": "Cập nhật dịch vụ",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Cập nhật thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "delete": {
+        "tags": ["Admin Services"],
+        "summary": "Xóa dịch vụ",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Xóa thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      }
+    },
+    "/admin/employees": {
+      "get": {
+        "tags": ["Admin Employees"],
+        "summary": "Lấy danh sách nhân viên",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden - Admin only"}
+        }
+      },
+      "post": {
+        "tags": ["Admin Employees"],
+        "summary": "Thêm nhân viên mới",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["employeeName", "roleID", "phoneNumber", "email"],
+                "properties": {
+                  "employeeName": {"type": "string"},
+                  "roleID": {"type": "integer"},
+                  "phoneNumber": {"type": "string"},
+                  "email": {"type": "string", "format": "email"},
+                  "info": {"type": "string"},
+                  "services": {"type": "array", "items": {"type": "integer"}}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {"description": "Thêm thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden - Admin only"}
+        }
+      }
+    },
+    "/admin/employees/{id}": {
+      "get": {
+        "tags": ["Admin Employees"],
+        "summary": "Lấy chi tiết nhân viên",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "put": {
+        "tags": ["Admin Employees"],
+        "summary": "Cập nhật nhân viên",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Cập nhật thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "delete": {
+        "tags": ["Admin Employees"],
+        "summary": "Xóa nhân viên",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Xóa thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      }
+    },
+    "/admin/employees/{id}/schedules": {
+      "post": {
+        "tags": ["Admin Employees"],
+        "summary": "Thêm lịch làm việc cho nhân viên",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["dayOfWeek", "startTime", "endTime"],
+                "properties": {
+                  "dayOfWeek": {"type": "string", "enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]},
+                  "startTime": {"type": "string", "format": "time", "example": "08:00"},
+                  "endTime": {"type": "string", "format": "time", "example": "17:00"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {"description": "Thêm thành công"},
+          "400": {"description": "Đã có lịch trong ngày này"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      }
+    },
+    "/admin/employees/{id}/schedules/{scheduleId}": {
+      "put": {
+        "tags": ["Admin Employees"],
+        "summary": "Cập nhật lịch làm việc",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}},
+          {"name": "scheduleId", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {"description": "Cập nhật thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "delete": {
+        "tags": ["Admin Employees"],
+        "summary": "Xóa lịch làm việc",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}},
+          {"name": "scheduleId", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {"description": "Xóa thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      }
+    },
+    "/admin/appointments": {
+      "get": {
+        "tags": ["Admin Appointments"],
+        "summary": "Lấy danh sách tất cả lịch hẹn",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden - Admin only"}
+        }
+      }
+    },
+    "/admin/appointments/{id}": {
+      "get": {
+        "tags": ["Admin Appointments"],
+        "summary": "Lấy chi tiết lịch hẹn",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "delete": {
+        "tags": ["Admin Appointments"],
+        "summary": "Xóa lịch hẹn",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Xóa thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      }
+    },
+    "/admin/appointments/{id}/status": {
+      "patch": {
+        "tags": ["Admin Appointments"],
+        "summary": "Cập nhật trạng thái lịch hẹn",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": {"type": "string", "enum": ["Pending", "Confirmed", "Completed", "Cancelled"]}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Cập nhật thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "tags": ["Admin Users"],
+        "summary": "Lấy danh sách người dùng",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden - Admin only"}
+        }
+      }
+    },
+    "/admin/users/{id}": {
+      "get": {
+        "tags": ["Admin Users"],
+        "summary": "Lấy chi tiết người dùng",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "delete": {
+        "tags": ["Admin Users"],
+        "summary": "Xóa người dùng",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Xóa thành công"},
+          "400": {"description": "Không thể xóa tài khoản admin"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      }
+    },
+    "/admin/roles": {
+      "get": {
+        "tags": ["Admin Roles"],
+        "summary": "Lấy danh sách chức vụ",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden - Admin only"}
+        }
+      },
+      "post": {
+        "tags": ["Admin Roles"],
+        "summary": "Thêm chức vụ mới",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["roleName"],
+                "properties": {
+                  "roleName": {"type": "string", "example": "Bác sĩ thú y"},
+                  "description": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {"description": "Thêm thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden - Admin only"}
+        }
+      }
+    },
+    "/admin/roles/{id}": {
+      "get": {
+        "tags": ["Admin Roles"],
+        "summary": "Lấy chi tiết chức vụ",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "put": {
+        "tags": ["Admin Roles"],
+        "summary": "Cập nhật chức vụ",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Cập nhật thành công"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      },
+      "delete": {
+        "tags": ["Admin Roles"],
+        "summary": "Xóa chức vụ",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {
+          "200": {"description": "Xóa thành công"},
+          "400": {"description": "Không thể xóa - đang có nhân viên sử dụng"},
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Forbidden"},
+          "404": {"description": "Không tìm thấy"}
+        }
+      }
+    }
+  }
+}

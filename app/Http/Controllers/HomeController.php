@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Models\ServiceCategory;
+use OpenApi\Annotations as OA;
 
 class HomeController extends Controller
 {
@@ -19,6 +20,27 @@ class HomeController extends Controller
     
     /**
      * API: Lấy dữ liệu trang chủ
+     * 
+     * @OA\Get(
+     *     path="/home",
+     *     summary="Lấy dữ liệu trang chủ",
+     *     tags={"Home"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="services", type="array", @OA\Items(ref="#/components/schemas/Service")),
+     *                 @OA\Property(property="categories", type="array", @OA\Items(ref="#/components/schemas/ServiceCategory")),
+     *                 @OA\Property(property="featured_services", type="array", @OA\Items(ref="#/components/schemas/Service"))
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Lấy dữ liệu trang chủ thành công")
+     *         )
+     *     )
+     * )
      */
     public function apiIndex()
     {
@@ -43,6 +65,34 @@ class HomeController extends Controller
 
     /**
      * API: Tìm kiếm dịch vụ
+     * 
+     * @OA\Get(
+     *     path="/home/search",
+     *     summary="Tìm kiếm dịch vụ",
+     *     tags={"Home"},
+     *     @OA\Parameter(
+     *         name="q",
+     *         in="query",
+     *         description="Từ khóa tìm kiếm",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="query", type="string"),
+     *                 @OA\Property(property="services", type="array", @OA\Items(ref="#/components/schemas/Service")),
+     *                 @OA\Property(property="count", type="integer")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Tìm kiếm thành công")
+     *         )
+     *     )
+     * )
      */
     public function apiSearch(Request $request)
     {

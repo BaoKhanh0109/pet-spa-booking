@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
+use OpenApi\Annotations as OA;
 
 class GoogleAuthController extends Controller
 {
@@ -66,6 +67,25 @@ class GoogleAuthController extends Controller
     
     /**
      * API: Get Google OAuth redirect URL
+     * 
+     * @OA\Get(
+     *     path="/auth/google/url",
+     *     summary="Lấy URL đăng nhập Google",
+     *     tags={"Google Auth"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="url", type="string", example="https://accounts.google.com/o/oauth2/...")
+     *             ),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     )
+     * )
      */
     public function apiGetRedirectUrl()
     {
@@ -82,6 +102,36 @@ class GoogleAuthController extends Controller
 
     /**
      * API: Handle Google authentication callback
+     * 
+     * @OA\Post(
+     *     path="/auth/google/callback",
+     *     summary="Xử lý callback từ Google",
+     *     tags={"Google Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"code"},
+     *             @OA\Property(property="code", type="string", description="Authorization code từ Google")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Đăng nhập thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="user", ref="#/components/schemas/User"),
+     *                 @OA\Property(property="access_token", type="string"),
+     *                 @OA\Property(property="token_type", type="string", example="Bearer")
+     *             ),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Đăng nhập Google thất bại"),
+     *     @OA\Response(response=422, description="Validation Error")
+     * )
      */
     public function apiHandleCallback(Request $request)
     {

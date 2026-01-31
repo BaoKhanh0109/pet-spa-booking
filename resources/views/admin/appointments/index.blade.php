@@ -116,7 +116,12 @@
                                 </td>
 
                                 <td class="py-4 px-6">
-                                    @if($app->status == 'approved')
+                                    @if($app->status == 'completed')
+                                        <span
+                                            class="inline-block px-3 py-1 rounded-full text-xs font-bold text-white bg-blue-500 shadow-sm whitespace-nowrap">
+                                            Hoàn Thành
+                                        </span>
+                                    @elseif($app->status == 'approved')
                                         <span
                                             class="inline-block px-3 py-1 rounded-full text-xs font-bold text-white bg-green-500 shadow-sm whitespace-nowrap">
                                             Đã Duyệt
@@ -144,7 +149,15 @@
                                             </a>
                                         @endif
 
-                                        @if($app->status != 'canceled')
+                                        @if($app->status == 'approved')
+                                            <a href="{{ route('admin.appointments.status', ['id' => $app->appointmentID, 'status' => 'completed']) }}"
+                                                class="text-blue-500 hover:text-blue-600 font-bold transition transform hover:scale-110"
+                                                title="Hoàn thành" onclick="return confirm('Xác nhận lịch hẹn đã hoàn thành?')">
+                                                <i class="fas fa-flag-checkered"></i>
+                                            </a>
+                                        @endif
+
+                                        @if($app->status != 'canceled' && $app->status != 'approved' && $app->status != 'completed')
                                             <a href="{{ route('admin.appointments.status', ['id' => $app->appointmentID, 'status' => 'canceled']) }}"
                                                 class="text-red-500 hover:text-red-600 font-bold transition transform hover:scale-110"
                                                 title="Hủy" onclick="return confirm('Bạn có chắc muốn hủy lịch hẹn này?')">

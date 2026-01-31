@@ -8,6 +8,7 @@ use App\Models\EmployeeRole;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use OpenApi\Annotations as OA;
 
 class EmployeeController extends Controller
 {
@@ -230,6 +231,23 @@ class EmployeeController extends Controller
     
     /**
      * API: Get all employees
+     * 
+     * @OA\Get(
+     *     path="/admin/employees",
+     *     summary="Lấy danh sách nhân viên",
+     *     tags={"Admin Employees"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Employee"))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only")
+     * )
      */
     public function apiIndex()
     {
@@ -243,6 +261,37 @@ class EmployeeController extends Controller
 
     /**
      * API: Create employee
+     * 
+     * @OA\Post(
+     *     path="/admin/employees",
+     *     summary="Thêm nhân viên mới",
+     *     tags={"Admin Employees"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"employeeName", "roleID", "phoneNumber", "email"},
+     *             @OA\Property(property="employeeName", type="string", example="Trần Văn B"),
+     *             @OA\Property(property="roleID", type="integer", example=1),
+     *             @OA\Property(property="phoneNumber", type="string", example="0987654321"),
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="info", type="string"),
+     *             @OA\Property(property="services", type="array", @OA\Items(type="integer"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Thêm thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Employee")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=422, description="Validation Error")
+     * )
      */
     public function apiStore(Request $request)
     {
@@ -271,6 +320,31 @@ class EmployeeController extends Controller
 
     /**
      * API: Get employee detail
+     * 
+     * @OA\Get(
+     *     path="/admin/employees/{id}",
+     *     summary="Lấy chi tiết nhân viên",
+     *     tags={"Admin Employees"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID nhân viên",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/Employee")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiShow($id)
     {
@@ -291,6 +365,43 @@ class EmployeeController extends Controller
 
     /**
      * API: Update employee
+     * 
+     * @OA\Put(
+     *     path="/admin/employees/{id}",
+     *     summary="Cập nhật nhân viên",
+     *     tags={"Admin Employees"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID nhân viên",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="employeeName", type="string"),
+     *             @OA\Property(property="roleID", type="integer"),
+     *             @OA\Property(property="phoneNumber", type="string"),
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="info", type="string"),
+     *             @OA\Property(property="services", type="array", @OA\Items(type="integer"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Employee")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiUpdate(Request $request, $id)
     {
@@ -328,6 +439,31 @@ class EmployeeController extends Controller
 
     /**
      * API: Delete employee
+     * 
+     * @OA\Delete(
+     *     path="/admin/employees/{id}",
+     *     summary="Xóa nhân viên",
+     *     tags={"Admin Employees"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID nhân viên",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Xóa thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiDestroy($id)
     {
@@ -355,6 +491,42 @@ class EmployeeController extends Controller
 
     /**
      * API: Add schedule
+     * 
+     * @OA\Post(
+     *     path="/admin/employees/{id}/schedules",
+     *     summary="Thêm lịch làm việc cho nhân viên",
+     *     tags={"Admin Employees"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID nhân viên",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"dayOfWeek", "startTime", "endTime"},
+     *             @OA\Property(property="dayOfWeek", type="string", enum={"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}),
+     *             @OA\Property(property="startTime", type="string", format="time", example="08:00"),
+     *             @OA\Property(property="endTime", type="string", format="time", example="17:00")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Thêm thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", ref="#/components/schemas/WorkSchedule")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Đã có lịch trong ngày này"),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiStoreSchedule(Request $request, $id)
     {
@@ -399,6 +571,48 @@ class EmployeeController extends Controller
 
     /**
      * API: Update schedule
+     * 
+     * @OA\Put(
+     *     path="/admin/employees/{id}/schedules/{scheduleId}",
+     *     summary="Cập nhật lịch làm việc",
+     *     tags={"Admin Employees"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID nhân viên",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="scheduleId",
+     *         in="path",
+     *         description="ID lịch làm việc",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"dayOfWeek", "startTime", "endTime"},
+     *             @OA\Property(property="dayOfWeek", type="string", enum={"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}),
+     *             @OA\Property(property="startTime", type="string", format="time", example="08:00"),
+     *             @OA\Property(property="endTime", type="string", format="time", example="17:00")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cập nhật thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", ref="#/components/schemas/WorkSchedule")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiUpdateSchedule(Request $request, $id, $scheduleId)
     {
@@ -441,6 +655,38 @@ class EmployeeController extends Controller
 
     /**
      * API: Delete schedule
+     * 
+     * @OA\Delete(
+     *     path="/admin/employees/{id}/schedules/{scheduleId}",
+     *     summary="Xóa lịch làm việc",
+     *     tags={"Admin Employees"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID nhân viên",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="scheduleId",
+     *         in="path",
+     *         description="ID lịch làm việc",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Xóa thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Không tìm thấy")
+     * )
      */
     public function apiDestroySchedule($id, $scheduleId)
     {
